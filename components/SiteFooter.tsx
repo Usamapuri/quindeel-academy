@@ -1,0 +1,47 @@
+import Image from "next/image";
+import { Editable } from "./Editable";
+
+type Props = {
+  academyName: string;
+  teacherName: string;
+  phone1: string;
+  phone2: string;
+  whatsapp: string;
+};
+
+export function SiteFooter({ academyName, teacherName, phone1, phone2, whatsapp }: Props) {
+  return (
+    <footer className="mt-16 bg-brand-dark text-white">
+      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-3">
+        <div>
+          <div className="flex items-center gap-3">
+            <span className="grid h-12 w-12 place-items-center overflow-hidden rounded-full bg-black/40">
+              <Image src="/logo.png" alt="" width={48} height={48} className="h-12 w-12 object-cover" />
+            </span>
+            <span className="text-lg font-bold">{academyName}</span>
+          </div>
+          <p className="mt-3 text-sm text-white/70">{teacherName}</p>
+        </div>
+
+        <div>
+          <h3 className="mb-2 font-semibold">Contact</h3>
+          <p className="text-sm text-white/80">📞 {phone1}</p>
+          <p className="text-sm text-white/80">📞 {phone2}</p>
+          <a
+            href={`https://wa.me/${whatsapp}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-block rounded-full bg-emerald-500 px-4 py-1.5 text-sm font-semibold text-white hover:bg-emerald-600"
+          >
+            WhatsApp
+          </a>
+        </div>
+
+        <div className="text-sm text-white/70">
+          <Editable field="setting:footerNote" value="" placeholder="Add a note here…" multiline />
+          <p className="mt-4">© {new Date().getFullYear()} {academyName}</p>
+        </div>
+      </div>
+    </footer>
+  );
+}

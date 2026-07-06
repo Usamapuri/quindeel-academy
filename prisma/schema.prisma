@@ -1,0 +1,157 @@
+// Quindeel Academy — data model
+// Everything the professor edits (site copy, course names in Urdu) lives here so it can be
+// inline-edited on the live page. LMS records (learners, classes, recordings, fees) are managed
+// through the simple admin panel.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  TEACHER
+  STUDENT
+}
+
+enum RegistrationStatus {
+  NEW
+  APPROVED
+  REJECTED
+}
+
+enum FeeStatus {
+  PAID
+  DUE
+  PARTIAL
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(STUDENT)
+  phone        String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  enrollments Enrollment[]
+  feeRecords  FeeRecord[]
+}
+
+// A course offered by the academy. All text fields are inline-editable by the teacher.
+model Course {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  titleEn       String
+  titleUr       String
+  summaryEn     String   @default("")
+  summaryUr     String   @default("")
+  descriptionEn String   @default("")
+  descriptionUr String   @default("")
+  feeText       String   @default("") // e.g. "20000/month" or "5000/Head"
+  order         Int      @default(0)
+  published     Boolean  @default(true)
+  colorTheme    String   @default("blue")
+  createdAt     DateTime @default(now())
+
+  enrollments  Enrollment[]
+  classSessions ClassSession[]
+  recordings   Recording[]
+  registrations RegistrationRequest[]
+  feeRecords   FeeRecord[]
+}
+
+// Key/value store for all editable landing-page copy (hero, about, policies, contacts, ...).
+model SiteSetting {
+  key   String @id
+  value String @default("")
+}
+
+// Which learner can see which course.
+model Enrollment {
+  id        String   @id @default(cuid())
+  studentId String
+  courseId  String
+  createdAt DateTime @default(now())
+
+  student User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course  Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, courseId])
+}
+
+// A live class. meetingLink is either a Google-generated Meet link or a manually pasted URL.
+model ClassSession {
+  id            String   @id @default(cuid())
+  courseId      String
+  title         String
+  descriptionEn String   @default("")
+  descriptionUr String   @default("")
+  startsAt      DateTime
+  durationMins  Int      @default(60)
+  meetingLink   String   @default("")
+  googleEventId String?
+  createdAt     DateTime @default(now())
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+// A recorded lecture (link to YouTube / Drive). Visible only to enrolled learners.
+model Recording {
+  id            String   @id @default(cuid())
+  courseId      String
+  title         String
+  url           String
+  descriptionEn String   @default("")
+  descriptionUr String   @default("")
+  recordedOn    DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+// A public registration/booking request. On approval it becomes a learner + enrollment.
+model RegistrationRequest {
+  id            String             @id @default(cuid())
+  name          String
+  phone         String
+  email         String
+  courseId      String?
+  preferredSlot DateTime?
+  message       String             @default("")
+  status        RegistrationStatus @default(NEW)
+  createdAt     DateTime           @default(now())
+
+  course Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+}
+
+// Fee ledger per learner. Teacher records payments; learner views their own.
+model FeeRecord {
+  id        String    @id @default(cuid())
+  studentId String
+  courseId  String?
+  period    String // e.g. "2026-08"
+  amount    Int
+  status    FeeStatus @default(DUE)
+  paidOn    DateTime?
+  note      String    @default("")
+  createdAt DateTime  @default(now())
+
+  student User    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course  Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+}
+
+// Single-row store for the teacher's connected Google account (powers Meet link creation).
+model GoogleAccount {
+  id           String    @id @default("primary")
+  email        String    @default("")
+  accessToken  String    @default("")
+  refreshToken String    @default("")
+  expiry       DateTime?
+  updatedAt    DateTime  @updatedAt
+}

@@ -1,14 +1,41 @@
 import { prisma } from "@/lib/db";
 import { addRecording, deleteRecording } from "@/app/actions/admin";
+import ConfirmDeleteButton from "@/components/ConfirmDeleteButton";
+import AdminFilterBar from "@/components/AdminFilterBar";
 
 const input =
   "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/30";
 
-export default async function RecordingsPage() {
-  const [courses, recordings] = await Promise.all([
+export default async function RecordingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; course?: string; sort?: string }>;
+}) {
+  const sp = await searchParams;
+  const q = (sp.q ?? "").trim().toLowerCase();
+  const courseFilter = sp.course ?? "";
+  const sort = sp.sort ?? "";
+
+  const [courses, allRecordings] = await Promise.all([
     prisma.course.findMany({ orderBy: { order: "asc" } }),
     prisma.recording.findMany({ orderBy: { createdAt: "desc" }, include: { course: true } }),
   ]);
+
+  const recordings = allRecordings
+    .filter((r) => !q || r.title.toLowerCase().includes(q))
+    .filter((r) => !courseFilter || r.courseId === courseFilter)
+    .sort((a, b) => {
+      switch (sort) {
+        case "title":
+          return a.title.localeCompare(b.title);
+        case "course":
+          return a.course.titleEn.localeCompare(b.course.titleEn);
+        case "oldest":
+          return +a.createdAt - +b.createdAt;
+        default:
+          return +b.createdAt - +a.createdAt; // newest
+      }
+    });
 
   return (
     <div className="space-y-8">
@@ -34,8 +61,34 @@ export default async function RecordingsPage() {
         </div>
       </form>
 
+      <AdminFilterBar
+        basePath="/admin/recordings"
+        current={sp}
+        search={{ name: "q", placeholder: "Search by title" }}
+        selects={[
+          {
+            name: "course",
+            label: "All courses",
+            options: courses.map((c) => ({ value: c.id, label: c.titleEn })),
+          },
+        ]}
+        sort={{
+          name: "sort",
+          options: [
+            { value: "", label: "Newest" },
+            { value: "oldest", label: "Oldest" },
+            { value: "title", label: "Title A–Z" },
+            { value: "course", label: "Course A–Z" },
+          ],
+        }}
+      />
+
       <div className="space-y-3">
-        {recordings.length === 0 && <p className="text-slate-500">No recordings yet.</p>}
+        {recordings.length === 0 && (
+          <p className="text-slate-500">
+            {allRecordings.length === 0 ? "No recordings yet." : "No recordings match the filter."}
+          </p>
+        )}
         {recordings.map((r) => (
           <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div>
@@ -46,10 +99,11 @@ export default async function RecordingsPage() {
               <a href={r.url} target="_blank" rel="noopener noreferrer" className="rounded-full bg-brand px-4 py-1.5 text-sm font-semibold text-white hover:bg-brand-dark">
                 Open
               </a>
-              <form action={deleteRecording}>
-                <input type="hidden" name="id" value={r.id} />
-                <button className="rounded-full px-2 py-1 text-xs font-semibold text-slate-400 hover:text-red-600">Delete</button>
-              </form>
+              <ConfirmDeleteButton
+                action={deleteRecording}
+                fields={{ id: r.id }}
+                message={`Delete the recording "${r.title}"?\n\nThis cannot be undone.`}
+              />
             </div>
           </div>
         ))}

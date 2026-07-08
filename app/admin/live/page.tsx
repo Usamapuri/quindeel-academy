@@ -2,6 +2,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { isGoogleConnected } from "@/lib/google";
 import { createClass, deleteClass } from "@/app/actions/live";
+import ConfirmDeleteButton from "@/components/ConfirmDeleteButton";
+import AdminFilterBar from "@/components/AdminFilterBar";
 
 const input =
   "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/30";
@@ -10,12 +12,35 @@ function fmt(d: Date) {
   return new Date(d).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
 }
 
-export default async function LivePage() {
-  const [courses, classes, connected] = await Promise.all([
+export default async function LivePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; course?: string; sort?: string }>;
+}) {
+  const sp = await searchParams;
+  const q = (sp.q ?? "").trim().toLowerCase();
+  const courseFilter = sp.course ?? "";
+  const sort = sp.sort ?? "";
+
+  const [courses, allClasses, connected] = await Promise.all([
     prisma.course.findMany({ orderBy: { order: "asc" } }),
     prisma.classSession.findMany({ orderBy: { startsAt: "desc" }, include: { course: true } }),
     isGoogleConnected(),
   ]);
+
+  const classes = allClasses
+    .filter((c) => !q || c.title.toLowerCase().includes(q))
+    .filter((c) => !courseFilter || c.courseId === courseFilter)
+    .sort((a, b) => {
+      switch (sort) {
+        case "soonest":
+          return +a.startsAt - +b.startsAt;
+        case "title":
+          return a.title.localeCompare(b.title);
+        default:
+          return +b.startsAt - +a.startsAt; // latest first
+      }
+    });
 
   return (
     <div className="space-y-8">
@@ -64,8 +89,33 @@ export default async function LivePage() {
         </div>
       </form>
 
+      <AdminFilterBar
+        basePath="/admin/live"
+        current={sp}
+        search={{ name: "q", placeholder: "Search by class title" }}
+        selects={[
+          {
+            name: "course",
+            label: "All courses",
+            options: courses.map((c) => ({ value: c.id, label: c.titleEn })),
+          },
+        ]}
+        sort={{
+          name: "sort",
+          options: [
+            { value: "", label: "Latest first" },
+            { value: "soonest", label: "Soonest first" },
+            { value: "title", label: "Title A–Z" },
+          ],
+        }}
+      />
+
       <div className="space-y-3">
-        {classes.length === 0 && <p className="text-slate-500">No classes scheduled yet.</p>}
+        {classes.length === 0 && (
+          <p className="text-slate-500">
+            {allClasses.length === 0 ? "No classes scheduled yet." : "No classes match the filter."}
+          </p>
+        )}
         {classes.map((c) => (
           <div key={c.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div>
@@ -80,10 +130,11 @@ export default async function LivePage() {
               ) : (
                 <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">No link</span>
               )}
-              <form action={deleteClass}>
-                <input type="hidden" name="id" value={c.id} />
-                <button className="rounded-full px-2 py-1 text-xs font-semibold text-slate-400 hover:text-red-600">Delete</button>
-              </form>
+              <ConfirmDeleteButton
+                action={deleteClass}
+                fields={{ id: c.id }}
+                message={`Delete the class "${c.title}"?\n\nThis cannot be undone.`}
+              />
             </div>
           </div>
         ))}

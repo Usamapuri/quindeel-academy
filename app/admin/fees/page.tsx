@@ -1,5 +1,14 @@
 import { prisma } from "@/lib/db";
-import { addFeeRecord, setFeeStatus, deleteFeeRecord } from "@/app/actions/admin";
+import { setFeeStatus, deleteFeeRecord } from "@/app/actions/admin";
+import ConfirmDeleteButton from "@/components/ConfirmDeleteButton";
+import AdminFilterBar from "@/components/AdminFilterBar";
+import FeeRecorder from "@/components/FeeRecorder";
+
+// Best-effort numeric price from a free-text fee like "20,000/month" or "Rs 5000".
+function parsePrice(feeText: string): number {
+  const m = feeText.replace(/[,\s]/g, "").match(/\d+/);
+  return m ? parseInt(m[0], 10) : 0;
+}
 
 const input =
   "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/30";
@@ -10,46 +19,87 @@ const STATUS_STYLE: Record<string, string> = {
   PARTIAL: "bg-amber-100 text-amber-700",
 };
 
-export default async function FeesPage() {
-  const [students, courses, records] = await Promise.all([
+export default async function FeesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; course?: string; status?: string; sort?: string }>;
+}) {
+  const sp = await searchParams;
+  const q = (sp.q ?? "").trim().toLowerCase();
+  const courseFilter = sp.course ?? "";
+  const statusFilter = sp.status ?? "";
+  const sort = sp.sort ?? "";
+
+  const [students, courses, allRecords] = await Promise.all([
     prisma.user.findMany({ where: { role: "STUDENT" }, orderBy: { name: "asc" } }),
     prisma.course.findMany({ orderBy: { order: "asc" } }),
     prisma.feeRecord.findMany({
+      where: { deletedAt: null },
       orderBy: [{ period: "desc" }, { createdAt: "desc" }],
       include: { student: true, course: true },
     }),
   ]);
 
+  const records = allRecords
+    .filter((r) => !q || r.student.name.toLowerCase().includes(q))
+    .filter((r) => !courseFilter || r.courseId === courseFilter)
+    .filter((r) => !statusFilter || r.status === statusFilter)
+    .sort((a, b) => {
+      switch (sort) {
+        case "name":
+          return a.student.name.localeCompare(b.student.name);
+        case "amount":
+          return b.amount - a.amount;
+        case "amount_asc":
+          return a.amount - b.amount;
+        case "status":
+          return a.status.localeCompare(b.status);
+        default:
+          // Newest: period desc then createdAt desc (matches the DB order)
+          return b.period.localeCompare(a.period) || +b.createdAt - +a.createdAt;
+      }
+    });
+
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-bold text-brand-dark">Fee Records</h1>
 
-      <form action={addFeeRecord} className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2 lg:grid-cols-6">
-        <div className="lg:col-span-6">
-          <h2 className="font-semibold text-brand-dark">Record a fee</h2>
-        </div>
-        <select name="studentId" required className={`${input} lg:col-span-2`}>
-          <option value="">Select learner</option>
-          {students.map((s) => (
-            <option key={s.id} value={s.id}>{s.name}</option>
-          ))}
-        </select>
-        <select name="courseId" className={input}>
-          <option value="">Course (optional)</option>
-          {courses.map((c) => (
-            <option key={c.id} value={c.id}>{c.titleEn}</option>
-          ))}
-        </select>
-        <input name="period" placeholder="Period e.g. 2026-08" required className={input} />
-        <input name="amount" type="number" placeholder="Amount" className={input} />
-        <select name="status" className={input}>
-          <option value="DUE">Due</option>
-          <option value="PAID">Paid</option>
-          <option value="PARTIAL">Partial</option>
-        </select>
-        <input name="note" placeholder="Note (optional)" className={`${input} lg:col-span-5`} />
-        <button className="btn btn-primary !py-2 text-sm lg:col-span-1">Add</button>
-      </form>
+      <FeeRecorder
+        students={students.map((s) => ({ id: s.id, name: s.name }))}
+        courses={courses.map((c) => ({ id: c.id, title: c.titleEn, price: parsePrice(c.feeText) }))}
+      />
+
+      <AdminFilterBar
+        basePath="/admin/fees"
+        current={sp}
+        search={{ name: "q", placeholder: "Search by learner name" }}
+        selects={[
+          {
+            name: "course",
+            label: "All courses",
+            options: courses.map((c) => ({ value: c.id, label: c.titleEn })),
+          },
+          {
+            name: "status",
+            label: "All statuses",
+            options: [
+              { value: "PAID", label: "Paid" },
+              { value: "DUE", label: "Due" },
+              { value: "PARTIAL", label: "Partial" },
+            ],
+          },
+        ]}
+        sort={{
+          name: "sort",
+          options: [
+            { value: "", label: "Newest period" },
+            { value: "name", label: "Learner A–Z" },
+            { value: "amount", label: "Amount high→low" },
+            { value: "amount_asc", label: "Amount low→high" },
+            { value: "status", label: "Status" },
+          ],
+        }}
+      />
 
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
         <table className="w-full text-sm">
@@ -65,7 +115,7 @@ export default async function FeesPage() {
           </thead>
           <tbody className="divide-y divide-slate-100">
             {records.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-6 text-center text-slate-400">No fee records yet.</td></tr>
+              <tr><td colSpan={6} className="px-4 py-6 text-center text-slate-400">{allRecords.length === 0 ? "No fee records yet." : "No fee records match the filter."}</td></tr>
             )}
             {records.map((r) => (
               <tr key={r.id}>
@@ -89,12 +139,11 @@ export default async function FeesPage() {
                         </button>
                       </form>
                     )}
-                    <form action={deleteFeeRecord}>
-                      <input type="hidden" name="id" value={r.id} />
-                      <button className="rounded-full px-2 py-1 text-xs font-semibold text-slate-400 hover:text-red-600">
-                        Delete
-                      </button>
-                    </form>
+                    <ConfirmDeleteButton
+                      action={deleteFeeRecord}
+                      fields={{ id: r.id }}
+                      message={`Delete the ${r.period} fee record for ${r.student.name}?\n\nThis cannot be undone.`}
+                    />
                   </div>
                 </td>
               </tr>

@@ -141,6 +141,9 @@ model FeeRecord {
   paidOn    DateTime?
   note      String    @default("")
   createdAt DateTime  @default(now())
+  // Soft-delete: when the teacher deletes a PAID fee it is hidden from the admin
+  // list but kept for the student as a payment receipt. DUE/PARTIAL are hard-deleted.
+  deletedAt DateTime?
 
   student User    @relation(fields: [studentId], references: [id], onDelete: Cascade)
   course  Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)

@@ -42,6 +42,16 @@ export async function createClass(formData: FormData) {
     }
   }
 
+  // A class must have a meeting link — pasted, or auto-created above. It must be a
+  // real http(s) URL (blocks junk like "or a"). No valid link → no class.
+  if (!meetingLink) return;
+  try {
+    const u = new URL(meetingLink);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return;
+  } catch {
+    return;
+  }
+
   await prisma.classSession.create({
     data: { courseId, title, startsAt, durationMins, descriptionEn, descriptionUr, meetingLink, googleEventId },
   });

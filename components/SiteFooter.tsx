@@ -7,10 +7,11 @@ type Props = {
   phone1: string;
   phone2: string;
   whatsapp: string;
+  footerNote: string;
   lang: "en" | "ur";
 };
 
-export function SiteFooter({ academyName, teacherName, phone1, phone2, whatsapp, lang }: Props) {
+export function SiteFooter({ academyName, teacherName, phone1, phone2, whatsapp, footerNote, lang }: Props) {
   const waDigits = whatsapp.replace(/\D/g, "");
   return (
     <footer className="mt-16 bg-brand-dark text-white">
@@ -42,7 +43,7 @@ export function SiteFooter({ academyName, teacherName, phone1, phone2, whatsapp,
         </div>
 
         <div className="text-sm text-white/70">
-          <Editable field="setting:footerNote" value="" placeholder="Add a note here…" multiline />
+          <Editable field="setting:footerNote" value={footerNote} placeholder="Add a note here…" multiline />
           <p className="mt-4">© {new Date().getFullYear()} {academyName}</p>
         </div>
       </div>

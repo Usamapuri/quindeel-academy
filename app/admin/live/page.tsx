@@ -89,7 +89,11 @@ export default async function LivePage({
         <input name="descriptionUr" placeholder={ur ? "تفصیل (اردو)" : "Description (Urdu)"} dir="rtl" className={input} />
         <input
           name="meetingLink"
-          placeholder={connected ? (ur ? "میٹنگ لنک (خودکار کے لیے خالی چھوڑیں)" : "Meeting link (leave blank to auto-create)") : (ur ? "گوگل میٹ / زوم لنک پیسٹ کریں" : "Paste Google Meet / Zoom link")}
+          type="url"
+          required={!connected}
+          pattern="https?://.+"
+          title={ur ? "براہ کرم مکمل لنک درج کریں (https:// سے شروع)" : "Please enter a full link starting with https://"}
+          placeholder={connected ? (ur ? "میٹنگ لنک (خودکار کے لیے خالی چھوڑیں)" : "Meeting link (leave blank to auto-create)") : (ur ? "https:// گوگل میٹ / زوم لنک (لازمی)" : "https://… Google Meet / Zoom link (required)")}
           className={`${input} sm:col-span-2`}
         />
         <div className="sm:col-span-2">

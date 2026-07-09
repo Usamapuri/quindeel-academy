@@ -11,6 +11,7 @@ export default async function PortalLayout({ children }: { children: React.React
   const lang = await getLang();
   const s = await getSettings();
   const academyName = s[settingKey("academyName", lang)] || "Quindeel Academy";
+  const footerNote = s.footerNote || "";
 
   return (
     <div className="flex min-h-full flex-col bg-slate-50">
@@ -34,6 +35,13 @@ export default async function PortalLayout({ children }: { children: React.React
         </div>
       </header>
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">{children}</main>
+      {footerNote && (
+        <footer className="border-t border-slate-200 bg-white">
+          <div className="mx-auto max-w-5xl whitespace-pre-wrap px-4 py-6 text-center text-sm text-slate-600">
+            {footerNote}
+          </div>
+        </footer>
+      )}
     </div>
   );
 }

@@ -27,6 +27,7 @@ export default async function PublicLayout({ children }: { children: React.React
         phone1={s.phone1 || ""}
         phone2={s.phone2 || ""}
         whatsapp={s.whatsapp || ""}
+        footerNote={s.footerNote || ""}
         lang={lang}
       />
     </>

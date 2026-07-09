@@ -181,6 +181,15 @@ model FeeRecord {
   course  Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
 }
 
+// A photo in the gallery. The image bytes live in Cloudinary; we only store the
+// delivery URL + public id (for deletion). Uploaded by the teacher.
+model Photo {
+  id        String   @id @default(cuid())
+  url       String
+  publicId  String
+  createdAt DateTime @default(now())
+}
+
 // Single-row store for the teacher's connected Google account (powers Meet link creation).
 model GoogleAccount {
   id           String    @id @default("primary")

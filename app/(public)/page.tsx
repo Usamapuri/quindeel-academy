@@ -6,6 +6,7 @@ import { getSettings, settingKey } from "@/lib/content";
 import { t } from "@/lib/i18n";
 import { Editable } from "@/components/Editable";
 import { CourseCard } from "@/components/CourseCard";
+import { GallerySlideshow } from "@/components/GallerySlideshow";
 
 export default async function LandingPage() {
   const lang = await getLang();
@@ -14,6 +15,8 @@ export default async function LandingPage() {
     where: { published: true },
     orderBy: { order: "asc" },
   });
+  // Latest photos for the home-page slideshow (kept small to stay light).
+  const photos = await prisma.photo.findMany({ orderBy: { createdAt: "desc" }, take: 12 });
 
   // helpers to bind a bilingual setting to an Editable field
   const field = (base: string) => `setting:${settingKey(base, lang)}`;
@@ -126,6 +129,23 @@ export default async function LandingPage() {
           </Link>
         </div>
       </section>
+
+      {/* Photo gallery slideshow (auto-cycles) */}
+      {photos.length > 0 && (
+        <section className="bg-slate-50 py-14">
+          <div className="mx-auto max-w-6xl px-4">
+            <h2 className="mb-8 text-center text-2xl font-bold text-brand-dark sm:text-3xl">
+              {t(lang, "nav.gallery")}
+            </h2>
+            <GallerySlideshow urls={photos.map((p) => p.url)} />
+            <div className="mt-5 text-center">
+              <Link href="/gallery" className="text-sm font-semibold text-brand hover:text-brand-dark">
+                {lang === "ur" ? "پوری گیلری دیکھیں" : "View full gallery"} →
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
     </>
   );
 }

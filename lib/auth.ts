@@ -48,13 +48,13 @@ export async function requireRole(
   if (!session) redirect("/login");
   // A still-valid cookie is not enough: a deactivated account must lose access
   // immediately, so re-check `active` on every gated request (not just at login).
-  // (We only redirect here — the cookie can't be cleared during render; it's
-  // harmless and gets overwritten on the next login.)
+  // Route through /api/logout (a Route Handler) so the stale cookie is actually
+  // cleared — otherwise /login would bounce the still-valid cookie back here.
   const user = await prisma.user.findUnique({
     where: { id: session.sub },
     select: { active: true },
   });
-  if (!user || !user.active) redirect("/login");
+  if (!user || !user.active) redirect("/api/logout");
   if (role && session.role !== role) {
     redirect(session.role === "TEACHER" ? "/admin" : "/portal");
   }

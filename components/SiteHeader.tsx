@@ -18,6 +18,7 @@ export function SiteHeader({ academyName, session }: Props) {
     { href: "/", label: t("nav.home") },
     { href: "/courses", label: t("nav.courses") },
     { href: "/fees", label: t("nav.fees") },
+    { href: "/blog", label: t("nav.blog") },
     { href: "/register", label: t("nav.register") },
   ];
 

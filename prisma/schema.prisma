@@ -76,6 +76,19 @@ model SiteSetting {
   value String @default("")
 }
 
+// A blog post. Inline-edited by the teacher on the public /blog page; read-only
+// for everyone else. Bilingual, and hidden from visitors until published.
+model BlogPost {
+  id        String   @id @default(cuid())
+  titleEn   String   @default("")
+  titleUr   String   @default("")
+  bodyEn    String   @default("")
+  bodyUr    String   @default("")
+  image     String   @default("") // optional cover picture (downscaled data URL)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
 // Which learner can see which course.
 model Enrollment {
   id        String   @id @default(cuid())

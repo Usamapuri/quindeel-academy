@@ -16,6 +16,9 @@ const COURSE_COLS = new Set([
   "feeText",
 ]);
 
+// Editable BlogPost columns (whitelist). `image` holds an optional data-URL cover.
+const BLOG_COLS = new Set(["titleEn", "titleUr", "bodyEn", "bodyUr", "image"]);
+
 export type SaveResult = { ok: boolean; error?: string };
 
 /**
@@ -42,6 +45,10 @@ export async function saveContent(field: string, value: string): Promise<SaveRes
     const [, id, col] = field.split(":");
     if (!id || !COURSE_COLS.has(col)) return { ok: false, error: "bad field" };
     await prisma.course.update({ where: { id }, data: { [col]: clean } });
+  } else if (field.startsWith("blog:")) {
+    const [, id, col] = field.split(":");
+    if (!id || !BLOG_COLS.has(col)) return { ok: false, error: "bad field" };
+    await prisma.blogPost.update({ where: { id }, data: { [col]: clean } });
   } else {
     return { ok: false, error: "unknown field" };
   }

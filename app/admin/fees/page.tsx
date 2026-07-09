@@ -139,6 +139,14 @@ export default async function FeesPage({
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
+                    <a
+                      href={`/invoice/${r.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-full border border-brand px-3 py-1 text-xs font-semibold text-brand hover:bg-brand-light"
+                    >
+                      📄 {ur ? "رسید" : "Invoice"}
+                    </a>
                     {r.status !== "PAID" && (
                       <form action={setFeeStatus}>
                         <input type="hidden" name="id" value={r.id} />

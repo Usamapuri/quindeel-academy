@@ -3,6 +3,7 @@ import { getLang } from "@/lib/lang";
 import { getSettings, settingKey } from "@/lib/content";
 import { Editable } from "@/components/Editable";
 import { RegisterForm } from "@/components/RegisterForm";
+import { UnregisterForm } from "@/components/UnregisterForm";
 
 export default async function RegisterPage({
   searchParams,
@@ -26,6 +27,7 @@ export default async function RegisterPage({
       <Editable field={field("registerTitle")} value={val("registerTitle")} as="h1" className="text-center text-3xl font-bold text-brand-dark" />
       <Editable field={field("registerIntro")} value={val("registerIntro")} as="p" multiline className="mb-8 mt-3 text-center text-slate-600" />
       <RegisterForm courses={courses} preselectSlug={course} lang={lang} />
+      <UnregisterForm courses={courses} lang={lang} />
     </section>
   );
 }

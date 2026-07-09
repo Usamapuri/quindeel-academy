@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { decideRegistrations, setRegistrationCourseStatus } from "@/app/actions/admin";
+import { decideRegistrations, setCourseDecisionForEmail, deleteRejectedCourse, decideUnregister } from "@/app/actions/admin";
+import ConfirmDeleteButton from "@/components/ConfirmDeleteButton";
 import { getLang } from "@/lib/lang";
 import { pick, type Lang } from "@/lib/i18n";
 
@@ -57,9 +58,14 @@ export default async function RegistrationsPage({
   const q = (sp.q ?? "").trim().toLowerCase();
   const sort = sp.sort ?? "";
 
-  const [all, students] = await Promise.all([
+  const [all, students, unregisters] = await Promise.all([
     loadRequests(),
     prisma.user.findMany({ where: { role: "STUDENT" }, select: { email: true } }),
+    prisma.unregisterRequest.findMany({
+      where: { status: "NEW" },
+      orderBy: { createdAt: "desc" },
+      include: { course: true },
+    }),
   ]);
   const accounts = new Set(students.map((s) => s.email.toLowerCase()));
 
@@ -107,6 +113,42 @@ export default async function RegistrationsPage({
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-brand-dark">{ur ? "رجسٹریشن درخواستیں" : "Registration Requests"}</h1>
+
+      {/* Unregister requests — a student asked to leave a course; teacher decides */}
+      {unregisters.length > 0 && (
+        <div className="rounded-2xl border-2 border-amber-400 bg-amber-50 p-4">
+          <p className="mb-2 font-bold text-amber-800">
+            🚪 {ur ? "کورس چھوڑنے کی درخواستیں" : "Unregister requests"} ({unregisters.length})
+          </p>
+          <div className="space-y-2">
+            {unregisters.map((u) => (
+              <div key={u.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-white px-3 py-2">
+                <span className="text-sm text-slate-700">
+                  <span className="font-semibold text-brand-dark">{u.name}</span>
+                  {u.email ? ` (${u.email})` : ""} — {ur ? "چھوڑنا چاہتے ہیں:" : "wants to leave:"}{" "}
+                  <span className="font-semibold">{pick(lang, u.course.titleEn, u.course.titleUr)}</span>
+                </span>
+                <div className="flex gap-2">
+                  <form action={decideUnregister}>
+                    <input type="hidden" name="id" value={u.id} />
+                    <input type="hidden" name="approve" value="true" />
+                    <button className="rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white hover:bg-red-700">
+                      {ur ? "منظور (نکالیں)" : "Approve (remove)"}
+                    </button>
+                  </form>
+                  <form action={decideUnregister}>
+                    <input type="hidden" name="id" value={u.id} />
+                    <input type="hidden" name="approve" value="false" />
+                    <button className="rounded-full border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100">
+                      {ur ? "مسترد (رکھیں)" : "Deny (keep)"}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex flex-wrap gap-1 rounded-full bg-slate-100 p-1">
@@ -250,11 +292,19 @@ export default async function RegistrationsPage({
         </div>
       )}
 
-      {/* ---------- APPROVED / REJECTED: click a chip to flip it ---------- */}
+      {/* ---------- APPROVED / REJECTED: one chip per course; click to flip ---------- */}
       {tab !== "pending" && (
         <div className="space-y-4">
           {groups.map((g) => {
             const flipTo = tab === "approved" ? "REJECTED" : "APPROVED";
+            // One chip per course — collapse duplicate requests for the same course.
+            const seen = new Set<string>();
+            const uniqueItems = g.items.filter((r) => {
+              const key = r.courseId ?? "__any__";
+              if (seen.has(key)) return false;
+              seen.add(key);
+              return true;
+            });
             return (
               <div key={g.key} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -265,27 +315,44 @@ export default async function RegistrationsPage({
                   <span className="text-xs text-slate-400">
                     {tab === "approved"
                       ? ur ? "مسترد کرنے کے لیے کورس پر کلک کریں" : "Click a course to reject it"
-                      : ur ? "منظور کرنے کے لیے کورس پر کلک کریں" : "Click a course to approve it"}
+                      : ur ? "منظور کرنے کے لیے کورس پر کلک کریں · حذف کے لیے ✕" : "Click a course to approve it · ✕ to delete"}
                   </span>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {g.items.map((r) => (
-                    <form key={r.id} action={setRegistrationCourseStatus}>
-                      <input type="hidden" name="id" value={r.id} />
-                      <input type="hidden" name="status" value={flipTo} />
-                      <button
-                        className={
-                          "rounded-full px-3 py-1 text-xs font-semibold transition " +
-                          (tab === "approved"
-                            ? "bg-emerald-100 text-emerald-700 hover:bg-red-100 hover:text-red-700"
-                            : "bg-red-100 text-red-700 hover:bg-emerald-100 hover:text-emerald-700")
-                        }
-                        title={tab === "approved" ? (ur ? "اس کورس کو مسترد کریں" : "Reject this course") : (ur ? "اس کورس کو منظور کریں" : "Approve this course")}
-                      >
-                        {tab === "approved" ? "✓ " : "✗ "}
-                        {chip(r)}
-                      </button>
-                    </form>
+                  {uniqueItems.map((r) => (
+                    <div key={r.courseId ?? "__any__"} className="flex items-center gap-1">
+                      <form action={setCourseDecisionForEmail}>
+                        <input type="hidden" name="email" value={g.email} />
+                        <input type="hidden" name="courseId" value={r.courseId ?? ""} />
+                        <input type="hidden" name="status" value={flipTo} />
+                        <button
+                          className={
+                            "rounded-full px-3 py-1 text-xs font-semibold transition " +
+                            (tab === "approved"
+                              ? "bg-emerald-100 text-emerald-700 hover:bg-red-100 hover:text-red-700"
+                              : "bg-red-100 text-red-700 hover:bg-emerald-100 hover:text-emerald-700")
+                          }
+                          title={tab === "approved" ? (ur ? "اس کورس کو مسترد کریں" : "Reject this course") : (ur ? "اس کورس کو منظور کریں" : "Approve this course")}
+                        >
+                          {tab === "approved" ? "✓ " : "✗ "}
+                          {chip(r)}
+                        </button>
+                      </form>
+                      {tab === "rejected" && (
+                        <ConfirmDeleteButton
+                          action={deleteRejectedCourse}
+                          fields={{ email: g.email, courseId: r.courseId ?? "" }}
+                          message={
+                            ur
+                              ? `"${chip(r)}" کو مسترد فہرست سے مستقل طور پر حذف کریں؟`
+                              : `Permanently delete "${chip(r)}" from the rejected list?`
+                          }
+                          className="grid h-6 w-6 place-items-center rounded-full bg-slate-200 text-xs font-bold text-slate-600 hover:bg-red-600 hover:text-white"
+                        >
+                          ✕
+                        </ConfirmDeleteButton>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>

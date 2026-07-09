@@ -150,54 +150,82 @@ export async function decideRegistrations(formData: FormData) {
   revalidateRegistrations();
 }
 
-// Flip a single already-decided request between APPROVED and REJECTED, keeping
-// the matching enrolment in sync. Used by the Approved/Rejected tabs so a
-// decision can be changed later. Approving when no account exists yet creates
+// Flip EVERY request a student (by email) has for a course to APPROVED/REJECTED at
+// once — so a course shows once per student in each tab and toggling it is
+// unambiguous. Keeps the enrolment in sync. Approving with no account yet creates
 // one with a temporary password (teacher resets it in Learners).
-export async function setRegistrationCourseStatus(formData: FormData) {
+export async function setCourseDecisionForEmail(formData: FormData) {
+  await requireRole("TEACHER");
+  const email = String(formData.get("email") || "").trim().toLowerCase();
+  const courseId = String(formData.get("courseId") || "") || null;
+  const status = String(formData.get("status") || "") as "APPROVED" | "REJECTED";
+  if (!email || (status !== "APPROVED" && status !== "REJECTED")) return;
+
+  await prisma.registrationRequest.updateMany({
+    where: { email: { equals: email, mode: "insensitive" }, courseId, status: { not: status } },
+    data: { status },
+  });
+
+  if (courseId) {
+    let user = await prisma.user.findUnique({ where: { email } });
+    if (status === "APPROVED") {
+      if (!user) {
+        const anyReq = await prisma.registrationRequest.findFirst({
+          where: { email: { equals: email, mode: "insensitive" } },
+        });
+        user = await ensureStudent(email, anyReq?.name ?? "Student", anyReq?.phone ?? "", randomBytes(9).toString("base64url"));
+      }
+      if (user) {
+        await prisma.enrollment.upsert({
+          where: { studentId_courseId: { studentId: user.id, courseId } },
+          update: {},
+          create: { studentId: user.id, courseId },
+        });
+      }
+    } else if (user) {
+      await prisma.enrollment.deleteMany({ where: { studentId: user.id, courseId } });
+    }
+  }
+  revalidateRegistrations();
+}
+
+// Permanently delete a rejected course entry for a student (all matching REJECTED
+// requests for that email+course). Used by the delete button in the Rejected tab.
+export async function deleteRejectedCourse(formData: FormData) {
+  await requireRole("TEACHER");
+  const email = String(formData.get("email") || "").trim().toLowerCase();
+  const courseId = String(formData.get("courseId") || "") || null;
+  if (!email) return;
+  await prisma.registrationRequest.deleteMany({
+    where: { email: { equals: email, mode: "insensitive" }, courseId, status: "REJECTED" },
+  });
+  revalidateRegistrations();
+}
+
+// The teacher decides a student's request to LEAVE a course. Approve removes the
+// enrolment (and moves any approved registration for that course to Rejected so
+// the tabs reflect it); Deny keeps them enrolled. Either way the request is closed.
+export async function decideUnregister(formData: FormData) {
   await requireRole("TEACHER");
   const id = String(formData.get("id") || "");
-  const status = String(formData.get("status") || "") as "APPROVED" | "REJECTED";
-  if (!id || (status !== "APPROVED" && status !== "REJECTED")) return;
-
-  const req = await prisma.registrationRequest.findUnique({ where: { id } });
-  if (!req) return;
+  const approve = String(formData.get("approve") || "") === "true";
+  if (!id) return;
+  const req = await prisma.unregisterRequest.findUnique({ where: { id } });
+  if (!req || req.status !== "NEW") return;
   const email = req.email.trim().toLowerCase();
 
-  if (status === "APPROVED") {
-    let user = email ? await prisma.user.findUnique({ where: { email } }) : null;
-    if (!user && email) {
-      // Edge case: re-approving a registrant who never got an account. Create one
-      // with a temporary password; the teacher sets a real one in Learners.
-      const temp = randomBytes(9).toString("base64url");
-      user = await ensureStudent(email, req.name, req.phone, temp);
+  if (approve) {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (user) {
+      await prisma.enrollment.deleteMany({ where: { studentId: user.id, courseId: req.courseId } });
     }
-    if (user && req.courseId) {
-      await prisma.enrollment.upsert({
-        where: { studentId_courseId: { studentId: user.id, courseId: req.courseId } },
-        update: {},
-        create: { studentId: user.id, courseId: req.courseId },
-      });
-    }
-    await prisma.registrationRequest.update({ where: { id }, data: { status: "APPROVED" } });
+    await prisma.registrationRequest.updateMany({
+      where: { email: { equals: email, mode: "insensitive" }, courseId: req.courseId, status: "APPROVED" },
+      data: { status: "REJECTED" },
+    });
+    await prisma.unregisterRequest.update({ where: { id }, data: { status: "APPROVED" } });
   } else {
-    const user = email ? await prisma.user.findUnique({ where: { email } }) : null;
-    if (user && req.courseId) {
-      // Only drop the enrolment if no OTHER approved request still covers this
-      // course — otherwise rejecting one duplicate would wrongly un-enrol them.
-      const otherApproved = await prisma.registrationRequest.count({
-        where: {
-          id: { not: req.id },
-          status: "APPROVED",
-          courseId: req.courseId,
-          email: { equals: email, mode: "insensitive" },
-        },
-      });
-      if (otherApproved === 0) {
-        await prisma.enrollment.deleteMany({ where: { studentId: user.id, courseId: req.courseId } });
-      }
-    }
-    await prisma.registrationRequest.update({ where: { id }, data: { status: "REJECTED" } });
+    await prisma.unregisterRequest.update({ where: { id }, data: { status: "REJECTED" } });
   }
   revalidateRegistrations();
 }

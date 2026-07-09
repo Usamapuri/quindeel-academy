@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getLang } from "@/lib/lang";
 
@@ -54,5 +55,50 @@ export async function registerAction(
     },
   });
 
+  return { ok: true };
+}
+
+// A student asks to LEAVE a course. We verify (by email) that they are actually
+// enrolled in it before recording the request; the teacher makes the final call.
+export async function unregisterAction(
+  _prev: RegisterState,
+  formData: FormData
+): Promise<RegisterState> {
+  const ur = (await getLang()) === "ur";
+  const name = String(formData.get("name") || "").trim();
+  const phone = String(formData.get("phone") || "").trim();
+  const email = String(formData.get("email") || "").trim().toLowerCase();
+  const courseId = String(formData.get("courseId") || "").trim();
+
+  if (!name || !phone || !email) {
+    return { error: ur ? "براہ کرم اپنا نام، فون اور ای میل درج کریں۔" : "Please enter your name, phone and email." };
+  }
+  if (phone.replace(/\D/g, "").length < 7) {
+    return { error: ur ? "براہ کرم درست فون نمبر درج کریں۔" : "Please enter a valid phone number." };
+  }
+  if (!courseId) {
+    return { error: ur ? "براہ کرم وہ کورس منتخب کریں جو آپ چھوڑنا چاہتے ہیں۔" : "Please select the course you want to leave." };
+  }
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  const enrolled = user
+    ? await prisma.enrollment.findFirst({ where: { studentId: user.id, courseId } })
+    : null;
+  if (!user || !enrolled) {
+    return {
+      error: ur
+        ? "اس ای میل کے ساتھ آپ اس کورس میں اندراج شدہ نہیں ہیں۔"
+        : "You are not enrolled in this course with that email.",
+    };
+  }
+
+  // One pending unregister request per email+course.
+  const existing = await prisma.unregisterRequest.findFirst({
+    where: { email: { equals: email, mode: "insensitive" }, courseId, status: "NEW" },
+  });
+  if (!existing) {
+    await prisma.unregisterRequest.create({ data: { name, phone, email, courseId, status: "NEW" } });
+    revalidatePath("/admin/registrations");
+  }
   return { ok: true };
 }

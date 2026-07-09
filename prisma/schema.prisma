@@ -66,6 +66,7 @@ model Course {
   classSessions ClassSession[]
   recordings   Recording[]
   registrations RegistrationRequest[]
+  unregisterRequests UnregisterRequest[]
   feeRecords   FeeRecord[]
 }
 
@@ -114,6 +115,21 @@ model Recording {
   descriptionUr String   @default("")
   recordedOn    DateTime @default(now())
   createdAt     DateTime @default(now())
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+// A student's request to LEAVE a course they're enrolled in. The teacher approves
+// (removes the enrolment) or denies (keeps it). Separate from RegistrationRequest
+// so the join flow stays untouched.
+model UnregisterRequest {
+  id        String             @id @default(cuid())
+  name      String
+  email     String
+  phone     String             @default("")
+  courseId  String
+  status    RegistrationStatus @default(NEW)
+  createdAt DateTime           @default(now())
 
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }

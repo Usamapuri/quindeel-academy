@@ -11,6 +11,7 @@
     "start": "next start",
     "start:prod": "prisma migrate deploy && npm run db:seed && next start",
     "lint": "eslint",
+    "test": "vitest run",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
@@ -39,6 +40,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   }
 }

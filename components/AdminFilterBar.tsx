@@ -1,6 +1,7 @@
 "use client";
 
 import type { ChangeEvent } from "react";
+import { useLang } from "./LangProvider";
 
 // Reusable filter + sort bar for admin list pages. It is a plain GET <form>:
 // selecting a dropdown auto-submits, and the search box submits on Enter or via
@@ -23,6 +24,8 @@ export default function AdminFilterBar({
   sort?: { name: string; options: Option[] };
   current: Record<string, string | undefined>;
 }) {
+  const { lang } = useLang();
+  const ur = lang === "ur";
   const autoSubmit = (e: ChangeEvent<HTMLSelectElement>) =>
     e.currentTarget.form?.requestSubmit();
 
@@ -69,7 +72,7 @@ export default function AdminFilterBar({
 
       {sort && (
         <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
-          Sort
+          {ur ? "ترتیب" : "Sort"}
           <select
             name={sort.name}
             defaultValue={current[sort.name] ?? ""}
@@ -89,7 +92,7 @@ export default function AdminFilterBar({
         type="submit"
         className="rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-white hover:bg-brand-dark"
       >
-        Apply
+        {ur ? "لاگو کریں" : "Apply"}
       </button>
 
       {hasActive && (
@@ -97,7 +100,7 @@ export default function AdminFilterBar({
           href={basePath}
           className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-500 hover:bg-slate-100"
         >
-          Clear
+          {ur ? "صاف کریں" : "Clear"}
         </a>
       )}
     </form>

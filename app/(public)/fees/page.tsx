@@ -51,7 +51,7 @@ export default async function FeesPage() {
 
       {/* Policies */}
       <div className="mt-8 rounded-2xl bg-brand-light p-6">
-        <h2 className="mb-3 text-lg font-bold text-brand-dark">Policies</h2>
+        <h2 className="mb-3 text-lg font-bold text-brand-dark">{lang === "ur" ? "پالیسیاں" : "Policies"}</h2>
         <ul className="list-inside list-disc space-y-2 text-slate-700">
           <li><Editable field={field("policy1")} value={val("policy1")} multiline /></li>
           <li><Editable field={field("policy2")} value={val("policy2")} multiline /></li>

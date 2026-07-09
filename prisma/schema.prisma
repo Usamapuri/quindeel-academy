@@ -53,6 +53,9 @@ model Course {
   summaryUr     String   @default("")
   descriptionEn String   @default("")
   descriptionUr String   @default("")
+  // JSON array of teacher-placed images shown under the description:
+  // [{ id, src(dataURL), x, y, w }] with x/y/w as % of the image box.
+  descriptionImages String @default("")
   feeText       String   @default("") // e.g. "20000/month" or "5000/Head"
   order         Int      @default(0)
   published     Boolean  @default(true)

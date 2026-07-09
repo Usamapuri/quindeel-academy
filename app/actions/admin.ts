@@ -119,19 +119,22 @@ export async function decideRegistrations(formData: FormData) {
   const allIds = String(formData.get("all") || "").split(",").filter(Boolean);
   const approvedIds = new Set(formData.getAll("approve").map(String));
   const password = String(formData.get("password") || "");
-  if (!email || allIds.length === 0) return;
+  if (allIds.length === 0) return;
 
   const reqs = await prisma.registrationRequest.findMany({ where: { id: { in: allIds } } });
-  const approving = reqs.filter((r) => approvedIds.has(r.id) && r.courseId);
+  // An email is the student's identity — without one we can't create an account
+  // or enrol them, so a no-email group can only ever be rejected (never stuck).
+  const canApprove = !!email;
+  const approving = canApprove ? reqs.filter((r) => approvedIds.has(r.id) && r.courseId) : [];
 
-  let user = await prisma.user.findUnique({ where: { email } });
+  let user = email ? await prisma.user.findUnique({ where: { email } }) : null;
   if (!user && approving.length > 0) {
     user = await ensureStudent(email, reqs[0]?.name ?? "Student", reqs[0]?.phone ?? "", password);
     if (!user) return; // approval requested but no password supplied — abort, teacher retries
   }
 
   for (const r of reqs) {
-    const approve = approvedIds.has(r.id);
+    const approve = canApprove && approvedIds.has(r.id);
     if (approve && user && r.courseId) {
       await prisma.enrollment.upsert({
         where: { studentId_courseId: { studentId: user.id, courseId: r.courseId } },
@@ -180,7 +183,19 @@ export async function setRegistrationCourseStatus(formData: FormData) {
   } else {
     const user = email ? await prisma.user.findUnique({ where: { email } }) : null;
     if (user && req.courseId) {
-      await prisma.enrollment.deleteMany({ where: { studentId: user.id, courseId: req.courseId } });
+      // Only drop the enrolment if no OTHER approved request still covers this
+      // course — otherwise rejecting one duplicate would wrongly un-enrol them.
+      const otherApproved = await prisma.registrationRequest.count({
+        where: {
+          id: { not: req.id },
+          status: "APPROVED",
+          courseId: req.courseId,
+          email: { equals: email, mode: "insensitive" },
+        },
+      });
+      if (otherApproved === 0) {
+        await prisma.enrollment.deleteMany({ where: { studentId: user.id, courseId: req.courseId } });
+      }
     }
     await prisma.registrationRequest.update({ where: { id }, data: { status: "REJECTED" } });
   }

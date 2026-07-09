@@ -12,6 +12,7 @@ const COURSE_COLS = new Set([
   "summaryUr",
   "descriptionEn",
   "descriptionUr",
+  "descriptionImages", // JSON array of positioned images shown under the description
   "feeText",
 ]);
 

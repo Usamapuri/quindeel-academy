@@ -7,9 +7,11 @@ type Props = {
   phone1: string;
   phone2: string;
   whatsapp: string;
+  lang: "en" | "ur";
 };
 
-export function SiteFooter({ academyName, teacherName, phone1, phone2, whatsapp }: Props) {
+export function SiteFooter({ academyName, teacherName, phone1, phone2, whatsapp, lang }: Props) {
+  const waDigits = whatsapp.replace(/\D/g, "");
   return (
     <footer className="mt-16 bg-brand-dark text-white">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-3">
@@ -24,17 +26,19 @@ export function SiteFooter({ academyName, teacherName, phone1, phone2, whatsapp 
         </div>
 
         <div>
-          <h3 className="mb-2 font-semibold">Contact</h3>
-          <p className="text-sm text-white/80">📞 {phone1}</p>
-          <p className="text-sm text-white/80">📞 {phone2}</p>
-          <a
-            href={`https://wa.me/${whatsapp}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-2 inline-block rounded-full bg-emerald-500 px-4 py-1.5 text-sm font-semibold text-white hover:bg-emerald-600"
-          >
-            WhatsApp
-          </a>
+          <h3 className="mb-2 font-semibold">{lang === "ur" ? "رابطہ" : "Contact"}</h3>
+          {phone1 && <p className="text-sm text-white/80">📞 {phone1}</p>}
+          {phone2 && <p className="text-sm text-white/80">📞 {phone2}</p>}
+          {waDigits && (
+            <a
+              href={`https://wa.me/${waDigits}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-block rounded-full bg-emerald-500 px-4 py-1.5 text-sm font-semibold text-white hover:bg-emerald-600"
+            >
+              WhatsApp
+            </a>
+          )}
         </div>
 
         <div className="text-sm text-white/70">

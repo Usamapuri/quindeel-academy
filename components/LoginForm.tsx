@@ -15,14 +15,14 @@ export function LoginForm() {
       {state.error && (
         <p className="rounded-lg bg-red-50 px-4 py-2 text-sm font-medium text-red-700">{state.error}</p>
       )}
-      <div>
-        <label className="mb-1 block font-semibold text-brand-dark">{t("common.email")}</label>
+      <label className="block">
+        <span className="mb-1 block font-semibold text-brand-dark">{t("common.email")}</span>
         <input name="email" type="email" required autoComplete="username" className={inputCls} />
-      </div>
-      <div>
-        <label className="mb-1 block font-semibold text-brand-dark">{t("common.password")}</label>
+      </label>
+      <label className="block">
+        <span className="mb-1 block font-semibold text-brand-dark">{t("common.password")}</span>
         <input name="password" type="password" required autoComplete="current-password" className={inputCls} />
-      </div>
+      </label>
       <button type="submit" disabled={pending} className="btn btn-primary w-full text-lg disabled:opacity-60">
         {pending ? t("common.saving") : t("login.button")}
       </button>

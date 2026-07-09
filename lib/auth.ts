@@ -3,6 +3,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
+import { prisma } from "./db";
 import { SESSION_COOKIE, signJwt, verifyJwt, type SessionPayload } from "./jwt";
 
 const THIRTY_DAYS = 60 * 60 * 24 * 30;
@@ -45,6 +46,15 @@ export async function requireRole(
 ): Promise<SessionPayload> {
   const session = await getSession();
   if (!session) redirect("/login");
+  // A still-valid cookie is not enough: a deactivated account must lose access
+  // immediately, so re-check `active` on every gated request (not just at login).
+  // (We only redirect here — the cookie can't be cleared during render; it's
+  // harmless and gets overwritten on the next login.)
+  const user = await prisma.user.findUnique({
+    where: { id: session.sub },
+    select: { active: true },
+  });
+  if (!user || !user.active) redirect("/login");
   if (role && session.role !== role) {
     redirect(session.role === "TEACHER" ? "/admin" : "/portal");
   }

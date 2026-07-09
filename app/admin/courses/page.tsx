@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { addCourse, deleteCourse, toggleCoursePublished, moveCourse } from "@/app/actions/admin";
 import ConfirmDeleteButton from "@/components/ConfirmDeleteButton";
 import AdminFilterBar from "@/components/AdminFilterBar";
+import { getLang } from "@/lib/lang";
 
 const input =
   "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/30";
@@ -12,6 +13,8 @@ export default async function CoursesPage({
 }: {
   searchParams: Promise<{ q?: string; published?: string; sort?: string }>;
 }) {
+  const lang = await getLang();
+  const ur = lang === "ur";
   const sp = await searchParams;
   const q = (sp.q ?? "").trim().toLowerCase();
   const publishedFilter = sp.published ?? "";
@@ -39,43 +42,43 @@ export default async function CoursesPage({
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold text-brand-dark">Courses</h1>
+      <h1 className="text-2xl font-bold text-brand-dark">{ur ? "کورسز" : "Courses"}</h1>
       <p className="text-slate-600">
-        Add or remove courses here. To change a course&apos;s name, description or fee, open{" "}
-        <Link href="/" className="font-semibold text-brand underline">your website</Link> and click the
-        text to edit it (in both English and Urdu).
+        {ur ? "یہاں کورسز شامل یا حذف کریں۔ کسی کورس کا نام، تفصیل یا فیس تبدیل کرنے کے لیے " : "Add or remove courses here. To change a course's name, description or fee, open "}
+        <Link href="/" className="font-semibold text-brand underline">{ur ? "اپنی ویب سائٹ" : "your website"}</Link>
+        {ur ? " کھولیں اور متن پر کلک کر کے ترمیم کریں (انگریزی اور اردو دونوں میں)۔" : " and click the text to edit it (in both English and Urdu)."}
       </p>
 
       <form action={addCourse} className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
         <div className="lg:col-span-4">
-          <h2 className="font-semibold text-brand-dark">Add a course</h2>
+          <h2 className="font-semibold text-brand-dark">{ur ? "کورس شامل کریں" : "Add a course"}</h2>
         </div>
-        <input name="titleEn" placeholder="Title (English)" required className={input} />
-        <input name="titleUr" placeholder="Title (Urdu)" dir="rtl" className={input} />
-        <input name="feeText" placeholder="Fee e.g. 15000/month" className={input} />
-        <button className="btn btn-primary !py-2 text-sm">Add course</button>
+        <input name="titleEn" placeholder={ur ? "عنوان (انگریزی)" : "Title (English)"} required className={input} />
+        <input name="titleUr" placeholder={ur ? "عنوان (اردو)" : "Title (Urdu)"} dir="rtl" className={input} />
+        <input name="feeText" placeholder={ur ? "فیس مثلاً 15000/ماہ" : "Fee e.g. 15000/month"} className={input} />
+        <button className="btn btn-primary !py-2 text-sm">{ur ? "کورس شامل کریں" : "Add course"}</button>
       </form>
 
       <AdminFilterBar
         basePath="/admin/courses"
         current={sp}
-        search={{ name: "q", placeholder: "Search by name" }}
+        search={{ name: "q", placeholder: ur ? "نام سے تلاش کریں" : "Search by name" }}
         selects={[
           {
             name: "published",
-            label: "All courses",
+            label: ur ? "تمام کورسز" : "All courses",
             options: [
-              { value: "true", label: "Published" },
-              { value: "false", label: "Hidden" },
+              { value: "true", label: ur ? "شائع شدہ" : "Published" },
+              { value: "false", label: ur ? "پوشیدہ" : "Hidden" },
             ],
           },
         ]}
         sort={{
           name: "sort",
           options: [
-            { value: "", label: "Manual order" },
-            { value: "title", label: "Title A–Z" },
-            { value: "title_desc", label: "Title Z–A" },
+            { value: "", label: ur ? "دستی ترتیب" : "Manual order" },
+            { value: "title", label: ur ? "عنوان: الف سے ے" : "Title A–Z" },
+            { value: "title_desc", label: ur ? "عنوان: ے سے الف" : "Title Z–A" },
           ],
         }}
       />
@@ -83,7 +86,9 @@ export default async function CoursesPage({
       <div className="space-y-3">
         {courses.length === 0 && (
           <p className="text-slate-500">
-            {allCourses.length === 0 ? "No courses yet." : "No courses match the filter."}
+            {allCourses.length === 0
+              ? ur ? "ابھی کوئی کورس نہیں۔" : "No courses yet."
+              : ur ? "فلٹر سے کوئی کورس نہیں ملا۔" : "No courses match the filter."}
           </p>
         )}
         {courses.map((c) => (
@@ -116,13 +121,17 @@ export default async function CoursesPage({
                     (c.published ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500")
                   }
                 >
-                  {c.published ? "Published" : "Hidden"}
+                  {c.published ? (ur ? "شائع شدہ" : "Published") : (ur ? "پوشیدہ" : "Hidden")}
                 </button>
               </form>
               <ConfirmDeleteButton
                 action={deleteCourse}
                 fields={{ id: c.id }}
-                message={`Delete the course "${c.titleEn}"?\n\nThis also removes its live classes, recordings and enrollments. This cannot be undone.`}
+                message={
+                  ur
+                    ? `کورس "${c.titleEn}" حذف کریں؟\n\nاس سے اس کی لائیو کلاسز، ریکارڈنگز اور اندراج بھی حذف ہو جائیں گے۔ یہ عمل واپس نہیں ہو سکتا۔`
+                    : `Delete the course "${c.titleEn}"?\n\nThis also removes its live classes, recordings and enrollments. This cannot be undone.`
+                }
               />
             </div>
           </div>

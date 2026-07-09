@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { addFeeRecord } from "@/app/actions/admin";
+import { useLang } from "./LangProvider";
 
 type Student = { id: string; name: string };
 type Course = { id: string; title: string; price: number };
@@ -13,6 +14,8 @@ const input =
 // are summed automatically, a percentage discount is applied, and the result
 // fills the (required) Amount field — which can still be edited by hand.
 export default function FeeRecorder({ students, courses }: { students: Student[]; courses: Course[] }) {
+  const { lang } = useLang();
+  const ur = lang === "ur";
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [discount, setDiscount] = useState("0");
   const [amount, setAmount] = useState("");
@@ -36,30 +39,30 @@ export default function FeeRecorder({ students, courses }: { students: Student[]
 
   return (
     <form action={addFeeRecord} className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="font-semibold text-brand-dark">Record a fee</h2>
+      <h2 className="font-semibold text-brand-dark">{ur ? "فیس درج کریں" : "Record a fee"}</h2>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <select name="studentId" required className={input}>
-          <option value="">Select learner</option>
+          <option value="">{ur ? "طالب علم منتخب کریں" : "Select learner"}</option>
           {students.map((s) => (
             <option key={s.id} value={s.id}>{s.name}</option>
           ))}
         </select>
-        <input name="period" placeholder="Period e.g. 2026-08" required className={input} />
+        <input name="period" placeholder={ur ? "مہینہ مثلاً 2026-08" : "Period e.g. 2026-08"} required className={input} />
         <select name="status" className={input}>
-          <option value="DUE">Due</option>
-          <option value="PAID">Paid</option>
-          <option value="PARTIAL">Partial</option>
+          <option value="DUE">{ur ? "واجب الادا" : "Due"}</option>
+          <option value="PAID">{ur ? "ادا شدہ" : "Paid"}</option>
+          <option value="PARTIAL">{ur ? "جزوی" : "Partial"}</option>
         </select>
       </div>
 
       {/* Course multi-select — prices auto-sum */}
       <div>
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-          Courses charged (prices add up automatically)
+          {ur ? "چارج کیے گئے کورسز (قیمتیں خودبخود جمع ہوتی ہیں)" : "Courses charged (prices add up automatically)"}
         </p>
         {courses.length === 0 ? (
-          <p className="text-sm text-slate-400">No courses yet.</p>
+          <p className="text-sm text-slate-400">{ur ? "ابھی کوئی کورس نہیں۔" : "No courses yet."}</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {courses.map((c) => (
@@ -84,7 +87,7 @@ export default function FeeRecorder({ students, courses }: { students: Student[]
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <label className="text-xs font-semibold text-slate-500">
-          Discount %
+          {ur ? "رعایت %" : "Discount %"}
           <input
             name="discount"
             type="number"
@@ -96,7 +99,7 @@ export default function FeeRecorder({ students, courses }: { students: Student[]
           />
         </label>
         <label className="text-xs font-semibold text-slate-500">
-          Amount (PKR) <span className="text-red-500">*</span>
+          {ur ? "رقم (روپے)" : "Amount (PKR)"} <span className="text-red-500">*</span>
           <input
             name="amount"
             type="number"
@@ -104,23 +107,24 @@ export default function FeeRecorder({ students, courses }: { students: Student[]
             required
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            placeholder="Required"
+            placeholder={ur ? "لازمی" : "Required"}
             className={`${input} mt-1`}
           />
         </label>
-        <input name="note" placeholder="Note (optional)" className={`${input} self-end sm:col-span-2`} />
+        <input name="note" placeholder={ur ? "نوٹ (اختیاری)" : "Note (optional)"} className={`${input} self-end sm:col-span-2`} />
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-slate-500">
-          Subtotal <span className="font-semibold text-brand-dark">{subtotal.toLocaleString()}</span>
+          {ur ? "ذیلی رقم " : "Subtotal "}
+          <span className="font-semibold text-brand-dark">{subtotal.toLocaleString()}</span>
           {" − "}
           {Math.min(100, Math.max(0, parseFloat(discount) || 0))}% ={" "}
           <span className="font-semibold text-brand-dark">
-            {(parseInt(amount, 10) || 0).toLocaleString()} PKR
+            {(parseInt(amount, 10) || 0).toLocaleString()} {ur ? "روپے" : "PKR"}
           </span>
         </p>
-        <button className="btn btn-primary !py-2 text-sm">Add fee</button>
+        <button className="btn btn-primary !py-2 text-sm">{ur ? "فیس شامل کریں" : "Add fee"}</button>
       </div>
     </form>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
+import { useLang } from "./LangProvider";
 
 type Action = (formData: FormData) => void | Promise<void>;
 
@@ -12,7 +13,7 @@ export default function ConfirmDeleteButton({
   fields,
   message,
   className = "rounded-full px-2 py-1 text-xs font-semibold text-slate-400 hover:text-red-600",
-  children = "Delete",
+  children,
 }: {
   action: Action;
   fields: Record<string, string>;
@@ -20,6 +21,7 @@ export default function ConfirmDeleteButton({
   className?: string;
   children?: ReactNode;
 }) {
+  const { lang } = useLang();
   return (
     <form
       action={action}
@@ -30,7 +32,7 @@ export default function ConfirmDeleteButton({
       {Object.entries(fields).map(([name, value]) => (
         <input key={name} type="hidden" name={name} value={value} />
       ))}
-      <button className={className}>{children}</button>
+      <button className={className}>{children ?? (lang === "ur" ? "حذف کریں" : "Delete")}</button>
     </form>
   );
 }

@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { decideRegistrations, setRegistrationCourseStatus } from "@/app/actions/admin";
+import { getLang } from "@/lib/lang";
+import { pick, type Lang } from "@/lib/i18n";
 
 const input =
   "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/30";
 
-function fmt(d: Date | null) {
+function fmt(d: Date | null, lang: Lang) {
   if (!d) return "—";
-  return new Date(d).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
+  return new Date(d).toLocaleString(lang === "ur" ? "ur-PK" : "en-GB", { dateStyle: "medium", timeStyle: "short" });
 }
 
 type Req = Awaited<ReturnType<typeof loadRequests>>[number];
@@ -38,9 +40,9 @@ function groupByEmail(list: Req[]): Group[] {
 }
 
 const TABS = [
-  { id: "pending", label: "Pending", status: "NEW" as const },
-  { id: "approved", label: "Approved", status: "APPROVED" as const },
-  { id: "rejected", label: "Rejected", status: "REJECTED" as const },
+  { id: "pending", en: "Pending", ur: "زیرِ التوا", status: "NEW" as const },
+  { id: "approved", en: "Approved", ur: "منظور شدہ", status: "APPROVED" as const },
+  { id: "rejected", en: "Rejected", ur: "مسترد", status: "REJECTED" as const },
 ];
 
 export default async function RegistrationsPage({
@@ -48,6 +50,8 @@ export default async function RegistrationsPage({
 }: {
   searchParams: Promise<{ tab?: string; q?: string; sort?: string }>;
 }) {
+  const lang = await getLang();
+  const ur = lang === "ur";
   const sp = await searchParams;
   const tab = TABS.find((t) => t.id === sp.tab)?.id ?? "pending";
   const q = (sp.q ?? "").trim().toLowerCase();
@@ -97,11 +101,12 @@ export default async function RegistrationsPage({
     return s ? `?${s}` : "";
   };
 
-  const chip = (courseTitle: string) => courseTitle || "Any course";
+  const chip = (r: Req) =>
+    r.course ? pick(lang, r.course.titleEn, r.course.titleUr) : ur ? "کوئی بھی کورس" : "Any course";
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-brand-dark">Registration Requests</h1>
+      <h1 className="text-2xl font-bold text-brand-dark">{ur ? "رجسٹریشن درخواستیں" : "Registration Requests"}</h1>
 
       {/* Tabs */}
       <div className="flex flex-wrap gap-1 rounded-full bg-slate-100 p-1">
@@ -116,7 +121,7 @@ export default async function RegistrationsPage({
                 (active ? "bg-white text-brand-dark shadow-sm" : "text-slate-500 hover:text-brand-dark")
               }
             >
-              {t.label} ({counts[t.id as keyof typeof counts]})
+              {(ur ? t.ur : t.en)} ({counts[t.id as keyof typeof counts]})
             </Link>
           );
         })}
@@ -129,34 +134,36 @@ export default async function RegistrationsPage({
           type="search"
           name="q"
           defaultValue={sp.q ?? ""}
-          placeholder="Search by name / email / phone"
+          placeholder={ur ? "نام / ای میل / فون سے تلاش کریں" : "Search by name / email / phone"}
           className={`${input} w-56`}
         />
         <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
-          Sort
+          {ur ? "ترتیب" : "Sort"}
           <select name="sort" defaultValue={sort} className={input}>
-            <option value="">Newest</option>
-            <option value="oldest">Oldest</option>
-            <option value="name">Name A–Z</option>
-            <option value="name_desc">Name Z–A</option>
+            <option value="">{ur ? "تازہ ترین" : "Newest"}</option>
+            <option value="oldest">{ur ? "قدیم ترین" : "Oldest"}</option>
+            <option value="name">{ur ? "نام: الف سے ے" : "Name A–Z"}</option>
+            <option value="name_desc">{ur ? "نام: ے سے الف" : "Name Z–A"}</option>
           </select>
         </label>
         <button className="rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-white hover:bg-brand-dark">
-          Apply
+          {ur ? "لاگو کریں" : "Apply"}
         </button>
         {(q || sort) && (
           <Link
             href={`/admin/registrations${tab === "pending" ? "" : `?tab=${tab}`}`}
             className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-500 hover:bg-slate-100"
           >
-            Clear
+            {ur ? "صاف کریں" : "Clear"}
           </Link>
         )}
       </form>
 
       {groups.length === 0 && (
         <p className="text-slate-500">
-          {q ? "No requests match the search." : `No ${tab} requests.`}
+          {q
+            ? ur ? "تلاش سے کوئی درخواست نہیں ملی۔" : "No requests match the search."
+            : ur ? "کوئی درخواست نہیں۔" : `No ${tab} requests.`}
         </p>
       )}
 
@@ -178,17 +185,20 @@ export default async function RegistrationsPage({
                   <div>
                     <p className="text-lg font-bold text-brand-dark">{g.name}</p>
                     <p className="text-sm text-slate-500">
-                      {g.email || "no email"}
+                      {g.email || (ur ? "کوئی ای میل نہیں" : "no email")}
                       {g.phone ? ` · 📞 ${g.phone}` : ""}
                     </p>
                   </div>
                   <p className="text-sm text-slate-400">
-                    Requested {fmt(g.items.map((i) => i.createdAt).sort((a, b) => +b - +a)[0])}
+                    {ur ? "درخواست: " : "Requested "}
+                    {fmt(g.items.map((i) => i.createdAt).sort((a, b) => +b - +a)[0], lang)}
                   </p>
                 </div>
 
                 <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                  Tick courses to approve · unticked will be rejected
+                  {ur
+                    ? "منظوری کے لیے کورسز پر نشان لگائیں · غیر نشان زدہ مسترد ہوں گے"
+                    : "Tick courses to approve · unticked will be rejected"}
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {g.items.map((r) => (
@@ -201,7 +211,7 @@ export default async function RegistrationsPage({
                         className="peer sr-only"
                       />
                       <span className="inline-block rounded-full border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-500 transition peer-checked:border-brand peer-checked:bg-brand peer-checked:text-white">
-                        {chip(r.course?.titleEn ?? "")}
+                        {chip(r)}
                       </span>
                     </label>
                   ))}
@@ -211,26 +221,28 @@ export default async function RegistrationsPage({
                   <div className="mt-4 flex flex-wrap items-end gap-2 border-t border-slate-100 pt-4">
                     <div>
                       <label className="block text-xs font-semibold text-slate-500">
-                        Login email
+                        {ur ? "لاگ اِن ای میل" : "Login email"}
                       </label>
                       <input value={g.email} readOnly className={`${input} min-w-[14rem] bg-slate-50`} />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-500">
-                        Set password (new student)
+                        {ur ? "پاس ورڈ مقرر کریں (نیا طالب علم)" : "Set password (new student)"}
                       </label>
-                      <input name="password" className={input} placeholder="Required to approve" />
+                      <input name="password" className={input} placeholder={ur ? "منظوری کے لیے لازمی" : "Required to approve"} />
                     </div>
                   </div>
                 )}
                 {!g.email && (
                   <p className="mt-3 text-xs font-semibold text-red-600">
-                    No email on this request — it can only be rejected (a login needs an email).
+                    {ur
+                      ? "اس درخواست پر کوئی ای میل نہیں — اسے صرف مسترد کیا جا سکتا ہے (لاگ اِن کے لیے ای میل ضروری ہے)۔"
+                      : "No email on this request — it can only be rejected (a login needs an email)."}
                   </p>
                 )}
 
                 <div className="mt-4">
-                  <button className="btn btn-primary !py-2 text-sm">Confirm decisions</button>
+                  <button className="btn btn-primary !py-2 text-sm">{ur ? "فیصلے محفوظ کریں" : "Confirm decisions"}</button>
                 </div>
               </form>
             );
@@ -248,10 +260,12 @@ export default async function RegistrationsPage({
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <p className="font-bold text-brand-dark">{g.name}</p>
-                    <p className="text-sm text-slate-500">{g.email || "no email"}</p>
+                    <p className="text-sm text-slate-500">{g.email || (ur ? "کوئی ای میل نہیں" : "no email")}</p>
                   </div>
                   <span className="text-xs text-slate-400">
-                    {tab === "approved" ? "Click a course to reject it" : "Click a course to approve it"}
+                    {tab === "approved"
+                      ? ur ? "مسترد کرنے کے لیے کورس پر کلک کریں" : "Click a course to reject it"
+                      : ur ? "منظور کرنے کے لیے کورس پر کلک کریں" : "Click a course to approve it"}
                   </span>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -266,10 +280,10 @@ export default async function RegistrationsPage({
                             ? "bg-emerald-100 text-emerald-700 hover:bg-red-100 hover:text-red-700"
                             : "bg-red-100 text-red-700 hover:bg-emerald-100 hover:text-emerald-700")
                         }
-                        title={tab === "approved" ? "Reject this course" : "Approve this course"}
+                        title={tab === "approved" ? (ur ? "اس کورس کو مسترد کریں" : "Reject this course") : (ur ? "اس کورس کو منظور کریں" : "Approve this course")}
                       >
                         {tab === "approved" ? "✓ " : "✗ "}
-                        {chip(r.course?.titleEn ?? "")}
+                        {chip(r)}
                       </button>
                     </form>
                   ))}

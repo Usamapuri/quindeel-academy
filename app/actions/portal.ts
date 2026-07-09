@@ -30,7 +30,15 @@ export async function requestCourses(formData: FormData) {
     ...openRequests.map((r) => r.courseId).filter((c): c is string => Boolean(c)),
   ]);
 
-  const toCreate = courseIds.filter((id) => !taken.has(id));
+  // Only accept ids that are real, published courses — never trust the client.
+  // (A bogus id would otherwise hit the FK constraint and 500 the action.)
+  const validCourses = await prisma.course.findMany({
+    where: { id: { in: courseIds }, published: true },
+    select: { id: true },
+  });
+  const valid = new Set(validCourses.map((c) => c.id));
+
+  const toCreate = courseIds.filter((id) => valid.has(id) && !taken.has(id));
   if (toCreate.length === 0) return;
 
   await prisma.registrationRequest.createMany({

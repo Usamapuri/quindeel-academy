@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { getLang } from "@/lib/lang";
 import { t } from "@/lib/i18n";
 import { Editable } from "@/components/Editable";
+import CourseImageBox from "@/components/CourseImageBox";
 
 export default async function CourseDetailPage({
   params,
@@ -50,6 +51,9 @@ export default async function CourseDetailPage({
           placeholder="Write the full course description here…"
         />
       </div>
+
+      {/* Teacher-placed images, shown below the description (read-only for students) */}
+      <CourseImageBox courseId={course.id} initial={course.descriptionImages} lang={lang} />
 
       <div className="mt-10 text-center">
         <Link href={`/register?course=${course.slug}`} className="btn btn-primary text-lg">

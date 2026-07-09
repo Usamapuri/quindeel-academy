@@ -36,24 +36,32 @@ export function RegisterForm({
         <p className="rounded-lg bg-red-50 px-4 py-2 text-sm font-medium text-red-700">{state.error}</p>
       )}
 
-      <div>
-        <label className="mb-1 block font-semibold text-brand-dark">{t("common.name")}</label>
+      <label className="block">
+        <span className="mb-1 block font-semibold text-brand-dark">{t("common.name")}</span>
         <input name="name" required className={inputCls} />
-      </div>
+      </label>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-1 block font-semibold text-brand-dark">{t("common.phone")}</label>
-          <input name="phone" required inputMode="tel" className={inputCls} />
-        </div>
-        <div>
-          <label className="mb-1 block font-semibold text-brand-dark">{t("common.email")}</label>
+        <label className="block">
+          <span className="mb-1 block font-semibold text-brand-dark">{t("common.phone")}</span>
+          <input
+            name="phone"
+            required
+            type="tel"
+            inputMode="tel"
+            pattern="[0-9+()\-\s]{7,}"
+            title={lang === "ur" ? "براہ کرم درست فون نمبر درج کریں (صرف ہندسے)" : "Please enter a valid phone number (digits only)"}
+            className={inputCls}
+          />
+        </label>
+        <label className="block">
+          <span className="mb-1 block font-semibold text-brand-dark">{t("common.email")}</span>
           <input name="email" type="email" className={inputCls} />
-        </div>
+        </label>
       </div>
 
-      <div>
-        <label className="mb-1 block font-semibold text-brand-dark">{t("common.course")}</label>
+      <label className="block">
+        <span className="mb-1 block font-semibold text-brand-dark">{t("common.course")}</span>
         <select name="courseId" defaultValue={preselectId} className={inputCls}>
           <option value="">{t("common.selectCourse")}</option>
           {courses.map((c) => (
@@ -62,17 +70,17 @@ export function RegisterForm({
             </option>
           ))}
         </select>
-      </div>
+      </label>
 
-      <div>
-        <label className="mb-1 block font-semibold text-brand-dark">{t("common.preferredTime")}</label>
+      <label className="block">
+        <span className="mb-1 block font-semibold text-brand-dark">{t("common.preferredTime")}</span>
         <input name="preferredSlot" type="datetime-local" className={inputCls} />
-      </div>
+      </label>
 
-      <div>
-        <label className="mb-1 block font-semibold text-brand-dark">{t("common.message")}</label>
+      <label className="block">
+        <span className="mb-1 block font-semibold text-brand-dark">{t("common.message")}</span>
         <textarea name="message" rows={3} className={inputCls} />
-      </div>
+      </label>
 
       <button type="submit" disabled={pending} className="btn btn-primary w-full text-lg disabled:opacity-60">
         {pending ? t("common.saving") : t("common.submit")}

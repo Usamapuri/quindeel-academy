@@ -8,6 +8,8 @@ import {
 } from "@/app/actions/admin";
 import ConfirmDeleteButton from "@/components/ConfirmDeleteButton";
 import AdminFilterBar from "@/components/AdminFilterBar";
+import { getLang } from "@/lib/lang";
+import { pick } from "@/lib/i18n";
 
 const input =
   "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/30";
@@ -17,6 +19,8 @@ export default async function LearnersPage({
 }: {
   searchParams: Promise<{ q?: string; course?: string; sort?: string }>;
 }) {
+  const lang = await getLang();
+  const ur = lang === "ur";
   const sp = await searchParams;
   const q = (sp.q ?? "").trim().toLowerCase();
   const courseFilter = sp.course ?? "";
@@ -49,19 +53,19 @@ export default async function LearnersPage({
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold text-brand-dark">Learners</h1>
+      <h1 className="text-2xl font-bold text-brand-dark">{ur ? "طلبہ" : "Learners"}</h1>
 
       {/* Add learner */}
       <form action={createLearner} className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
         <div className="lg:col-span-4">
-          <h2 className="font-semibold text-brand-dark">Add a new learner</h2>
+          <h2 className="font-semibold text-brand-dark">{ur ? "نیا طالب علم شامل کریں" : "Add a new learner"}</h2>
         </div>
-        <input name="name" placeholder="Full name" required className={input} />
-        <input name="email" type="email" placeholder="Email (login)" required className={input} />
-        <input name="phone" placeholder="Phone" className={input} />
-        <input name="password" placeholder="Set a password" required className={input} />
+        <input name="name" placeholder={ur ? "پورا نام" : "Full name"} required className={input} />
+        <input name="email" type="email" placeholder={ur ? "ای میل (لاگ اِن)" : "Email (login)"} required className={input} />
+        <input name="phone" placeholder={ur ? "فون نمبر" : "Phone"} className={input} />
+        <input name="password" placeholder={ur ? "پاس ورڈ مقرر کریں" : "Set a password"} required className={input} />
         <div className="lg:col-span-4">
-          <button className="btn btn-primary !py-2 text-sm">Add learner</button>
+          <button className="btn btn-primary !py-2 text-sm">{ur ? "طالب علم شامل کریں" : "Add learner"}</button>
         </div>
       </form>
 
@@ -69,21 +73,21 @@ export default async function LearnersPage({
       <AdminFilterBar
         basePath="/admin/learners"
         current={sp}
-        search={{ name: "q", placeholder: "Search by name / email" }}
+        search={{ name: "q", placeholder: ur ? "نام / ای میل سے تلاش کریں" : "Search by name / email" }}
         selects={[
           {
             name: "course",
-            label: "All courses",
-            options: courses.map((c) => ({ value: c.id, label: c.titleEn })),
+            label: ur ? "تمام کورسز" : "All courses",
+            options: courses.map((c) => ({ value: c.id, label: pick(lang, c.titleEn, c.titleUr) })),
           },
         ]}
         sort={{
           name: "sort",
           options: [
-            { value: "", label: "Newest" },
-            { value: "oldest", label: "Oldest" },
-            { value: "name", label: "Name A–Z" },
-            { value: "name_desc", label: "Name Z–A" },
+            { value: "", label: ur ? "تازہ ترین" : "Newest" },
+            { value: "oldest", label: ur ? "قدیم ترین" : "Oldest" },
+            { value: "name", label: ur ? "نام: الف سے ے" : "Name A–Z" },
+            { value: "name_desc", label: ur ? "نام: ے سے الف" : "Name Z–A" },
           ],
         }}
       />
@@ -92,7 +96,9 @@ export default async function LearnersPage({
       <div className="space-y-4">
         {learners.length === 0 && (
           <p className="text-slate-500">
-            {allLearners.length === 0 ? "No learners yet." : "No learners match the filter."}
+            {allLearners.length === 0
+              ? ur ? "ابھی کوئی طالب علم نہیں۔" : "No learners yet."
+              : ur ? "فلٹر سے کوئی طالب علم نہیں ملا۔" : "No learners match the filter."}
           </p>
         )}
         {learners.map((l) => {
@@ -103,7 +109,7 @@ export default async function LearnersPage({
                 <div>
                   <p className="font-bold text-brand-dark">
                     {l.name}{" "}
-                    {!l.active && <span className="rounded bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">Inactive</span>}
+                    {!l.active && <span className="rounded bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">{ur ? "غیر فعال" : "Inactive"}</span>}
                   </p>
                   <p className="text-sm text-slate-500">{l.email}{l.phone ? ` · ${l.phone}` : ""}</p>
                 </div>
@@ -112,13 +118,17 @@ export default async function LearnersPage({
                     <input type="hidden" name="id" value={l.id} />
                     <input type="hidden" name="active" value={String(l.active)} />
                     <button className="rounded-full border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100">
-                      {l.active ? "Deactivate" : "Activate"}
+                      {l.active ? (ur ? "غیر فعال کریں" : "Deactivate") : (ur ? "فعال کریں" : "Activate")}
                     </button>
                   </form>
                   <ConfirmDeleteButton
                     action={deleteLearner}
                     fields={{ id: l.id }}
-                    message={`Permanently delete ${l.name}?\n\nThis removes their login, course enrollments and fee records. This cannot be undone.`}
+                    message={
+                      ur
+                        ? `کیا ${l.name} کو مستقل طور پر حذف کریں؟\n\nاس سے ان کا لاگ اِن، کورس اندراج اور فیس ریکارڈ حذف ہو جائیں گے۔ یہ عمل واپس نہیں ہو سکتا۔`
+                        : `Permanently delete ${l.name}?\n\nThis removes their login, course enrollments and fee records. This cannot be undone.`
+                    }
                     className="rounded-full border border-red-200 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-50"
                   />
                 </div>
@@ -128,9 +138,9 @@ export default async function LearnersPage({
               <details className="group mt-4 rounded-xl border border-slate-200 bg-slate-50/50">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100">
                   <span className="flex items-center gap-2">
-                    <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Courses</span>
+                    <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">{ur ? "کورسز" : "Courses"}</span>
                     <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-semibold text-brand">
-                      {enrolled.size} enrolled
+                      {ur ? `${enrolled.size} اندراج شدہ` : `${enrolled.size} enrolled`}
                     </span>
                   </span>
                   <span className="text-slate-400 transition-transform group-open:rotate-180">▾</span>
@@ -150,7 +160,7 @@ export default async function LearnersPage({
                           }
                         >
                           {isOn ? "✓ " : "+ "}
-                          {c.titleEn}
+                          {pick(lang, c.titleEn, c.titleUr)}
                         </button>
                       </form>
                     );
@@ -161,9 +171,9 @@ export default async function LearnersPage({
               {/* Reset password */}
               <form action={resetLearnerPassword} className="mt-4 flex flex-wrap items-center gap-2">
                 <input type="hidden" name="id" value={l.id} />
-                <input name="password" placeholder="New password" className={`${input} max-w-xs`} />
+                <input name="password" placeholder={ur ? "نیا پاس ورڈ" : "New password"} className={`${input} max-w-xs`} />
                 <button className="rounded-full border border-brand px-3 py-1.5 text-xs font-semibold text-brand hover:bg-brand-light">
-                  Reset password
+                  {ur ? "پاس ورڈ ری سیٹ کریں" : "Reset password"}
                 </button>
               </form>
             </div>

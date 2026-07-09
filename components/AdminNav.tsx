@@ -2,23 +2,26 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLang } from "./LangProvider";
 
 const LINKS = [
-  { href: "/admin", label: "Dashboard", icon: "🏠" },
-  { href: "/admin/learners", label: "Learners", icon: "👤" },
-  { href: "/admin/registrations", label: "Registrations", icon: "📥" },
-  { href: "/admin/fees", label: "Fee Records", icon: "💳" },
-  { href: "/admin/live", label: "Live Classes", icon: "🎥" },
-  { href: "/admin/recordings", label: "Recordings", icon: "▶️" },
-  { href: "/admin/courses", label: "Courses", icon: "📚" },
-  { href: "/admin/google", label: "Google", icon: "🔗" },
+  { href: "/admin", en: "Dashboard", ur: "ڈیش بورڈ", icon: "🏠" },
+  { href: "/admin/learners", en: "Learners", ur: "طلبہ", icon: "👤" },
+  { href: "/admin/registrations", en: "Registrations", ur: "رجسٹریشنز", icon: "📥" },
+  { href: "/admin/fees", en: "Fee Records", ur: "فیس ریکارڈ", icon: "💳" },
+  { href: "/admin/live", en: "Live Classes", ur: "لائیو کلاسز", icon: "🎥" },
+  { href: "/admin/recordings", en: "Recordings", ur: "ریکارڈنگز", icon: "▶️" },
+  { href: "/admin/courses", en: "Courses", ur: "کورسز", icon: "📚" },
+  { href: "/admin/google", en: "Google", ur: "گوگل", icon: "🔗" },
 ];
 
 export function AdminNav() {
   const pathname = usePathname();
+  const { lang } = useLang();
   return (
     <nav className="flex gap-1 overflow-x-auto px-4 py-2">
       {LINKS.map((l) => {
+        const label = lang === "ur" ? l.ur : l.en;
         const active = l.href === "/admin" ? pathname === "/admin" : pathname.startsWith(l.href);
         return (
           <Link
@@ -30,7 +33,7 @@ export function AdminNav() {
             }
           >
             <span aria-hidden>{l.icon}</span>
-            {l.label}
+            {label}
           </Link>
         );
       })}

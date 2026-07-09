@@ -28,6 +28,21 @@ export async function registerAction(
 
   const preferredSlot = slotRaw ? new Date(slotRaw) : null;
 
+  // Prevent duplicate pending requests: the same person (matched by email, or by
+  // phone when no email) may not have two identical NEW requests for the same
+  // course awaiting a decision at once. A request that was already processed
+  // (APPROVED/REJECTED) does NOT block sending a fresh one.
+  const identity = email
+    ? { email: { equals: email, mode: "insensitive" as const } }
+    : { phone };
+  const existingPending = await prisma.registrationRequest.findFirst({
+    where: { ...identity, courseId, status: "NEW" },
+  });
+  if (existingPending) {
+    // Already have an open request — treat as success without creating a duplicate.
+    return { ok: true };
+  }
+
   await prisma.registrationRequest.create({
     data: {
       name,

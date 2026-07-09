@@ -53,11 +53,11 @@ export default async function AdminDashboard() {
 
       <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div>
-          <h2 className="font-bold text-brand-dark">{ur ? "💾 بیک اپ" : "💾 Backup"}</h2>
+          <h2 className="font-bold text-brand-dark">{ur ? "📊 ایکسل رپورٹ" : "📊 Excel report"}</h2>
           <p className="mt-1 text-sm text-slate-600">
             {ur
-              ? "اپنے تمام کورسز، ویب سائٹ کے متن، طلبہ اور ریکارڈ ایک فائل میں محفوظ کریں۔ اسے محفوظ جگہ رکھیں۔"
-              : "Save all your courses, website text, learners and records into one file. Keep it somewhere safe."}
+              ? "طلبہ، ان کے کورسز، فیس اور تمام ریکارڈ ایک ایکسل اسپریڈ شیٹ میں ڈاؤن لوڈ کریں۔"
+              : "Download all students, their courses, fees and records as an Excel spreadsheet."}
           </p>
         </div>
         <a
@@ -65,7 +65,7 @@ export default async function AdminDashboard() {
           download
           className="whitespace-nowrap rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark"
         >
-          ⬇️ {ur ? "بیک اپ ڈاؤن لوڈ کریں" : "Download backup"}
+          ⬇️ {ur ? "ایکسل ڈاؤن لوڈ کریں" : "Download Excel"}
         </a>
       </div>
 

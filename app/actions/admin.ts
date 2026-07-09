@@ -285,15 +285,10 @@ export async function deleteFeeRecord(formData: FormData) {
   await requireRole("TEACHER");
   const id = String(formData.get("id") || "");
   if (!id) return;
-  const record = await prisma.feeRecord.findUnique({ where: { id } });
-  if (!record) return;
-  // A PAID fee is the student's receipt — keep it for them by soft-deleting
-  // (hidden from the teacher's list only). DUE/PARTIAL are removed entirely.
-  if (record.status === "PAID") {
-    await prisma.feeRecord.update({ where: { id }, data: { deletedAt: new Date() } });
-  } else {
-    await prisma.feeRecord.delete({ where: { id } });
-  }
+  // Soft-delete: the record is KEPT in the database (just flagged), hidden from
+  // the teacher's list. A PAID fee also stays visible to the student as a receipt;
+  // a deleted DUE/PARTIAL is hidden from the student too (see the portal query).
+  await prisma.feeRecord.updateMany({ where: { id, deletedAt: null }, data: { deletedAt: new Date() } });
   revalidatePath("/admin/fees");
   revalidatePath("/portal");
 }

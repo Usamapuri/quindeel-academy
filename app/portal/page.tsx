@@ -66,7 +66,9 @@ export default async function PortalHome() {
         })
       : Promise.resolve([]),
     prisma.feeRecord.findMany({
-      where: { studentId },
+      // Show active fees, plus deleted PAID fees (kept as receipts). A deleted
+      // DUE/PARTIAL charge is hidden — the student no longer owes it.
+      where: { studentId, OR: [{ deletedAt: null }, { status: "PAID" }] },
       orderBy: [{ period: "desc" }, { createdAt: "desc" }],
       include: { course: true },
     }),
@@ -124,6 +126,16 @@ export default async function PortalHome() {
                     <span className={"rounded-full px-2 py-0.5 text-xs font-semibold " + (FEE_STYLE[f.status] || "")}>
                       {f.status}
                     </span>
+                  </td>
+                  <td className="px-4 py-3 text-end">
+                    <a
+                      href={`/invoice/${f.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="whitespace-nowrap rounded-full border border-brand px-3 py-1 text-xs font-semibold text-brand hover:bg-brand-light"
+                    >
+                      📄 {lang === "ur" ? "رسید" : "Invoice"}
+                    </a>
                   </td>
                 </tr>
               ))}

@@ -1,11 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useEdit } from "./EditProvider";
 import ConfirmDeleteButton from "./ConfirmDeleteButton";
 import { signUpload, addPhoto, deletePhoto } from "@/app/actions/gallery";
-import { cld, THUMB } from "@/lib/cld";
+import { cld, THUMB, FULL } from "@/lib/cld";
 
 type Photo = { id: string; url: string };
 
@@ -22,7 +22,27 @@ export function PhotoGallery({
   const ur = lang === "ur";
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+  const [zoom, setZoom] = useState<number | null>(null); // index of the photo shown enlarged
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const step = (d: number) => setZoom((z) => (z === null ? z : (z + d + photos.length) % photos.length));
+
+  // Keyboard controls + lock background scroll while the lightbox is open.
+  useEffect(() => {
+    if (zoom === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setZoom(null);
+      else if (e.key === "ArrowLeft") step(-1);
+      else if (e.key === "ArrowRight") step(1);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [zoom, photos.length]);
 
   async function onFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
@@ -81,10 +101,16 @@ export function PhotoGallery({
         <p className="text-center text-slate-500">{ur ? "ابھی کوئی تصویر نہیں۔" : "No photos yet."}</p>
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-          {photos.map((p) => (
+          {photos.map((p, i) => (
             <div key={p.id} className="group relative aspect-square overflow-hidden rounded-xl bg-slate-100">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={cld(p.url, THUMB)} alt="" loading="lazy" className="h-full w-full object-cover" />
+              <img
+                src={cld(p.url, THUMB)}
+                alt=""
+                loading="lazy"
+                onClick={() => setZoom(i)}
+                className="h-full w-full cursor-zoom-in object-cover transition hover:opacity-90"
+              />
               {canEdit && (
                 <div className="absolute right-1 top-1 opacity-0 transition group-hover:opacity-100">
                   <ConfirmDeleteButton
@@ -99,6 +125,60 @@ export function PhotoGallery({
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Click-to-zoom lightbox (students + teachers) */}
+      {zoom !== null && photos[zoom] && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setZoom(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <button
+            type="button"
+            onClick={() => setZoom(null)}
+            aria-label={ur ? "بند کریں" : "Close"}
+            className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-white/10 text-2xl leading-none text-white hover:bg-white/20"
+          >
+            ✕
+          </button>
+
+          {photos.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); step(-1); }}
+                aria-label={ur ? "پچھلی" : "Previous"}
+                className="absolute left-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-3xl leading-none text-white hover:bg-white/20"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); step(1); }}
+                aria-label={ur ? "اگلی" : "Next"}
+                className="absolute right-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-3xl leading-none text-white hover:bg-white/20"
+              >
+                ›
+              </button>
+            </>
+          )}
+
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={cld(photos[zoom].url, FULL)}
+            alt=""
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[90vh] max-w-full rounded-lg object-contain shadow-2xl"
+          />
+
+          {photos.length > 1 && (
+            <span className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-white/10 px-3 py-1 text-sm font-semibold text-white">
+              {zoom + 1} / {photos.length}
+            </span>
+          )}
         </div>
       )}
     </div>

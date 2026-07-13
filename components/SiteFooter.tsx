@@ -18,8 +18,8 @@ export function SiteFooter({ academyName, teacherName, phone1, phone2, whatsapp,
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-3">
         <div>
           <div className="flex items-center gap-3">
-            <span className="grid h-12 w-12 place-items-center overflow-hidden rounded-full bg-black/40">
-              <Image src="/logo.png" alt="" width={48} height={48} className="h-12 w-12 object-cover" />
+            <span className="grid h-12 w-12 place-items-center overflow-hidden rounded-full bg-white">
+              <Image src="/logo.jpeg" alt="" width={48} height={48} className="h-12 w-12 object-contain" />
             </span>
             <span className="text-lg font-bold">{academyName}</span>
           </div>

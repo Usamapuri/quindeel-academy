@@ -18,8 +18,8 @@ export default async function PortalLayout({ children }: { children: React.React
       <header className="bg-gradient-to-r from-brand-dark to-brand text-white">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
           <Link href="/portal" className="flex items-center gap-3">
-            <span className="grid h-11 w-11 place-items-center overflow-hidden rounded-full bg-black/30">
-              <Image src="/logo.png" alt="" width={44} height={44} className="h-11 w-11 object-cover" />
+            <span className="grid h-11 w-11 place-items-center overflow-hidden rounded-full bg-white">
+              <Image src="/logo.jpeg" alt="" width={44} height={44} className="h-11 w-11 object-contain" />
             </span>
             <span className="font-bold">{academyName}</span>
           </Link>

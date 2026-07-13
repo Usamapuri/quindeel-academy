@@ -30,8 +30,8 @@ export function SiteHeader({ academyName, session }: Props) {
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
         <Link href="/" className="flex items-center gap-3">
-          <span className="grid h-12 w-12 place-items-center overflow-hidden rounded-full bg-brand-dark ring-2 ring-brand/30">
-            <Image src="/logo.png" alt="Quindeel Academy" width={48} height={48} className="h-12 w-12 object-cover" />
+          <span className="grid h-12 w-12 place-items-center overflow-hidden rounded-full bg-white ring-2 ring-brand/30">
+            <Image src="/logo.jpeg" alt="Quindeel Academy" width={48} height={48} className="h-12 w-12 object-contain" />
           </span>
           <span className="text-lg font-bold leading-tight text-brand-dark sm:text-xl">
             {academyName}

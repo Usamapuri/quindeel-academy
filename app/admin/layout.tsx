@@ -17,8 +17,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
           <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-brand-dark">
-              <Image src="/logo.png" alt="" width={40} height={40} className="h-10 w-10 object-cover" />
+            <span className="grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-white ring-1 ring-slate-200">
+              <Image src="/logo.jpeg" alt="" width={40} height={40} className="h-10 w-10 object-contain" />
             </span>
             <div>
               <p className="font-bold leading-tight text-brand-dark">

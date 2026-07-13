@@ -27,8 +27,8 @@ export default async function LandingPage() {
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-brand-dark via-brand to-brand-mid text-white">
         <div className="mx-auto flex max-w-4xl flex-col items-center gap-5 px-4 py-16 text-center sm:py-24">
-          <span className="grid h-24 w-24 place-items-center overflow-hidden rounded-full bg-black/30 ring-4 ring-white/20">
-            <Image src="/logo.png" alt="Quindeel Academy" width={96} height={96} className="h-24 w-24 object-cover" />
+          <span className="grid h-24 w-24 place-items-center overflow-hidden rounded-full bg-white ring-4 ring-white/30">
+            <Image src="/logo.jpeg" alt="Quindeel Academy" width={96} height={96} className="h-24 w-24 object-contain" />
           </span>
           <Editable
             field={field("academyName")}

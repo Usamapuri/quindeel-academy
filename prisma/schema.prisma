@@ -68,6 +68,7 @@ model Course {
   registrations RegistrationRequest[]
   unregisterRequests UnregisterRequest[]
   feeRecords   FeeRecord[]
+  videos       Video[]
 }
 
 // Key/value store for all editable landing-page copy (hero, about, policies, contacts, ...).
@@ -124,6 +125,9 @@ model Video {
   title       String   @default("")
   description String   @default("") // optional teacher note explaining the video
   createdAt   DateTime @default(now())
+  // No courses = public video (achievements etc., shown to everyone). One or more
+  // courses = a lecture note visible to logged-in students enrolled in ANY of them.
+  courses     Course[]
 }
 
 // A blog post. Inline-edited by the teacher on the public /blog page; read-only

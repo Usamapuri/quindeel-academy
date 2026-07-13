@@ -77,3 +77,28 @@ html[dir="rtl"] h3 {
 .btn-outline:hover {
   background: var(--color-brand-light);
 }
+
+/* Soft decorative dotted motif behind the hero — pure CSS, zero maintenance. */
+.hero-motif {
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.10) 1.5px, transparent 1.5px),
+    radial-gradient(rgba(255, 255, 255, 0.07) 1.5px, transparent 1.5px);
+  background-size: 34px 34px, 34px 34px;
+  background-position: 0 0, 17px 17px;
+}
+
+/* Fade-and-rise as a section scrolls into view. Only animates when the visitor
+   hasn't asked to reduce motion; otherwise everything stays fully visible. The
+   <noscript> block in the public layout also force-shows it when JS is off. */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+    will-change: opacity, transform;
+  }
+  .reveal.reveal-in {
+    opacity: 1;
+    transform: none;
+  }
+}

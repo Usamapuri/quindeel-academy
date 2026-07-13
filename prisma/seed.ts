@@ -112,6 +112,29 @@ const SETTINGS: Record<string, string> = {
   registerTitleUr: "رجسٹریشن / کلاس بک کریں",
   registerIntroEn: "Send a registration request and pick a preferred time. We'll get back to you.",
   registerIntroUr: "رجسٹریشن کی درخواست بھیجیں اور اپنا پسندیدہ وقت منتخب کریں۔ ہم آپ سے رابطہ کریں گے۔",
+
+  // Home-page credibility strip (three quick facts). Value = the bold line, label = caption.
+  stat1ValueEn: "39+", stat1ValueUr: "39+",
+  stat1LabelEn: "Years of teaching", stat1LabelUr: "سال تدریسی تجربہ",
+  stat2ValueEn: "Free", stat2ValueUr: "مفت",
+  stat2LabelEn: "Admission, all courses", stat2LabelUr: "تمام کورسز میں داخلہ",
+  stat3ValueEn: "Online", stat3ValueUr: "آن لائن",
+  stat3LabelEn: "Live & recorded classes", stat3LabelUr: "لائیو اور ریکارڈڈ کلاسز",
+
+  // Home-page "Why learn with us" feature row (three cards). Icons are fixed in code.
+  featuresTitleEn: "Why learn with us", featuresTitleUr: "ہمارے ساتھ کیوں پڑھیں",
+  feature1TitleEn: "Live online classes", feature1TitleUr: "لائیو آن لائن کلاسز",
+  feature1BodyEn: "Interactive classes on Google Meet — join from anywhere.",
+  feature1BodyUr: "گوگل میٹ پر انٹرایکٹو کلاسز — کہیں سے بھی شامل ہوں۔",
+  feature2TitleEn: "Recorded lectures", feature2TitleUr: "ریکارڈڈ لیکچرز",
+  feature2BodyEn: "Every class is recorded, so you can revise anytime.",
+  feature2BodyUr: "ہر کلاس ریکارڈ ہوتی ہے، جب چاہیں دوبارہ دیکھیں۔",
+  feature3TitleEn: "Personal attention", feature3TitleUr: "انفرادی توجہ",
+  feature3BodyEn: "Small groups and bilingual guidance for real results.",
+  feature3BodyUr: "چھوٹے گروپس اور دو لسانی رہنمائی، بہترین نتائج کے لیے۔",
+
+  // Home-page testimonials section heading.
+  testimonialsTitleEn: "What students & parents say", testimonialsTitleUr: "طلبہ اور والدین کیا کہتے ہیں",
   teacherNameEn: "Prof. Muhammad Zaheer Quindeel",
   teacherNameUr: "پروفیسر محمد ظہیر قندیل",
   teacherTitleEn: "Former Head of Urdu Department, Cadet College Hassan Abdal",

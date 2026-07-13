@@ -15,6 +15,10 @@ export default async function PublicLayout({ children }: { children: React.React
 
   return (
     <>
+      {/* If JS is off, force scroll-reveal sections to be fully visible. */}
+      <noscript>
+        <style>{`.reveal{opacity:1 !important;transform:none !important;}`}</style>
+      </noscript>
       <EditModeBar />
       <SiteHeader
         academyName={academyName}

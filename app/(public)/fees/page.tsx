@@ -76,8 +76,15 @@ export default async function FeesPage() {
           />
         </div>
 
-        {(ur ? course.summaryUr : course.summaryEn) && (
-          <p className="mt-2 text-sm text-slate-500">{ur ? course.summaryUr : course.summaryEn}</p>
+        {(canEdit || (ur ? course.summaryUr : course.summaryEn)) && (
+          <Editable
+            field={`course:${course.id}:summary${suffix}`}
+            value={ur ? course.summaryUr : course.summaryEn}
+            as="p"
+            multiline
+            className="mt-2 text-sm text-slate-500"
+            placeholder={ur ? "مختصر تفصیل…" : "Short description…"}
+          />
         )}
 
         <div className="mt-4 border-t border-slate-100 pt-4">
@@ -132,9 +139,12 @@ export default async function FeesPage() {
             <span className="h-px w-6 bg-brand" />
             {ur ? "اساتذہ کے لیے" : "For educators"}
           </p>
-          <h2 className="mt-2 text-center text-2xl font-bold text-brand-dark sm:text-3xl">
-            {ur ? "اساتذہ ورکشاپ فیس" : "Teacher Workshop Fees"}
-          </h2>
+          <Editable
+            field={field("workshopFeesTitle")}
+            value={val("workshopFeesTitle")}
+            as="h2"
+            className="mt-2 text-center text-2xl font-bold text-brand-dark sm:text-3xl"
+          />
           <div className="mx-auto mt-8 grid max-w-4xl gap-6 sm:grid-cols-2">
             {workshops.map((c, i) => (
               <FeeCard key={c.id} course={c} index={courses.length + i} withPerks={false} />
@@ -146,8 +156,8 @@ export default async function FeesPage() {
       {/* Important notes (seeded from the academy's real policies; editable) */}
       <div className="mt-14 rounded-2xl border border-amber-200 bg-amber-50 p-6 sm:p-7">
         <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-amber-900">
-          <span className="grid h-6 w-6 place-items-center rounded-full bg-amber-200 text-sm text-amber-800">i</span>
-          {ur ? "اہم نکات" : "Important Notes"}
+          <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-amber-200 text-sm text-amber-800">i</span>
+          <Editable field={field("importantNotesTitle")} value={val("importantNotesTitle")} />
         </h2>
         <ul className="space-y-3 text-slate-700">
           <li className="flex gap-2.5">
@@ -163,9 +173,12 @@ export default async function FeesPage() {
 
       {/* Enroll CTA — wired to the real native /register + real contact details */}
       <div className="card mt-14 px-6 py-12 text-center sm:px-10">
-        <h2 className="text-2xl font-bold text-brand-dark sm:text-3xl">
-          {ur ? "داخلے کے لیے تیار ہیں؟" : "Ready to enroll?"}
-        </h2>
+        <Editable
+          field={field("feesReadyTitle")}
+          value={val("feesReadyTitle")}
+          as="h2"
+          className="text-2xl font-bold text-brand-dark sm:text-3xl"
+        />
         <Editable field={field("registerIntro")} value={val("registerIntro")} as="p" multiline className="mx-auto mt-3 max-w-2xl text-slate-600" />
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <Link href="/register" className="btn btn-primary">

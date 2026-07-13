@@ -112,6 +112,10 @@ const SETTINGS: Record<string, string> = {
   feePerk1En: "Live classes on Google Meet", feePerk1Ur: "گوگل میٹ پر لائیو کلاسز",
   feePerk2En: "Recorded lectures to revise", feePerk2Ur: "دہرائی کے لیے ریکارڈڈ لیکچرز",
   feePerk3En: "WhatsApp doubt-clearing support", feePerk3Ur: "واٹس ایپ پر سوالات کا حل",
+  // Editable section titles on the fees page (same convention as feeTitle etc.).
+  workshopFeesTitleEn: "Teacher Workshop Fees", workshopFeesTitleUr: "اساتذہ ورکشاپ فیس",
+  importantNotesTitleEn: "Important Notes", importantNotesTitleUr: "اہم نکات",
+  feesReadyTitleEn: "Ready to enroll?", feesReadyTitleUr: "داخلے کے لیے تیار ہیں؟",
   registerTitleEn: "Register / Book a Class",
   registerTitleUr: "رجسٹریشن / کلاس بک کریں",
   registerIntroEn: "Send a registration request and pick a preferred time. We'll get back to you.",

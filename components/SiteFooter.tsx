@@ -47,6 +47,21 @@ export function SiteFooter({ academyName, teacherName, phone1, phone2, whatsapp,
           <p className="mt-4">© {new Date().getFullYear()} {academyName}</p>
         </div>
       </div>
+
+      {/* Credit */}
+      <div className="border-t border-white/10">
+        <div className="mx-auto max-w-6xl px-4 py-4 text-center text-xs text-white/60">
+          {lang === "ur" ? "محبت سے تیار کردہ" : "Built with"} ❤️ {lang === "ur" ? "" : "by"}{" "}
+          <a
+            href="https://www.linkedin.com/in/usama-puri-42344a17b/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-white/85 underline decoration-white/30 underline-offset-2 hover:text-white"
+          >
+            Usama Puri
+          </a>
+        </div>
+      </div>
     </footer>
   );
 }

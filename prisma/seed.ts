@@ -108,6 +108,10 @@ const SETTINGS: Record<string, string> = {
   policy1Ur: "ایک ہی خاندان کے دوسرے داخلے پر ماہانہ فیس میں 10 فیصد رعایت۔",
   policy2En: "Fee shall be cleared by the 5th of every month.",
   policy2Ur: "فیس ہر ماہ کی 5 تاریخ تک ادا کی جائے۔",
+  // Shared perks shown on every fee card (edit once, applies to all courses).
+  feePerk1En: "Live classes on Google Meet", feePerk1Ur: "گوگل میٹ پر لائیو کلاسز",
+  feePerk2En: "Recorded lectures to revise", feePerk2Ur: "دہرائی کے لیے ریکارڈڈ لیکچرز",
+  feePerk3En: "WhatsApp doubt-clearing support", feePerk3Ur: "واٹس ایپ پر سوالات کا حل",
   registerTitleEn: "Register / Book a Class",
   registerTitleUr: "رجسٹریشن / کلاس بک کریں",
   registerIntroEn: "Send a registration request and pick a preferred time. We'll get back to you.",

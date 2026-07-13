@@ -22,6 +22,13 @@ const BLOG_COLS = new Set(["titleEn", "titleUr", "bodyEn", "bodyUr", "image"]);
 // Editable Video columns (whitelist) — just the teacher's description.
 const VIDEO_COLS = new Set(["description"]);
 
+// Editable Testimonial columns (whitelist).
+const TESTIMONIAL_COLS = new Set(["author", "role", "quote"]);
+
+// Editable Faculty / FacultyCategory columns (whitelist).
+const FACULTY_COLS = new Set(["nameEn", "nameUr", "shortEn", "shortUr", "bioEn", "bioUr", "photo"]);
+const FACULTY_CAT_COLS = new Set(["nameEn", "nameUr"]);
+
 export type SaveResult = { ok: boolean; error?: string };
 
 /**
@@ -56,6 +63,18 @@ export async function saveContent(field: string, value: string): Promise<SaveRes
     const [, id, col] = field.split(":");
     if (!id || !VIDEO_COLS.has(col)) return { ok: false, error: "bad field" };
     await prisma.video.update({ where: { id }, data: { [col]: clean } });
+  } else if (field.startsWith("testimonial:")) {
+    const [, id, col] = field.split(":");
+    if (!id || !TESTIMONIAL_COLS.has(col)) return { ok: false, error: "bad field" };
+    await prisma.testimonial.update({ where: { id }, data: { [col]: clean } });
+  } else if (field.startsWith("facultycat:")) {
+    const [, id, col] = field.split(":");
+    if (!id || !FACULTY_CAT_COLS.has(col)) return { ok: false, error: "bad field" };
+    await prisma.facultyCategory.update({ where: { id }, data: { [col]: clean } });
+  } else if (field.startsWith("faculty:")) {
+    const [, id, col] = field.split(":");
+    if (!id || !FACULTY_COLS.has(col)) return { ok: false, error: "bad field" };
+    await prisma.faculty.update({ where: { id }, data: { [col]: clean } });
   } else {
     return { ok: false, error: "unknown field" };
   }

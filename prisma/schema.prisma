@@ -76,6 +76,44 @@ model SiteSetting {
   value String @default("")
 }
 
+// Faculty directory shown on /about. Members are grouped into ordered categories
+// (e.g. "Headmaster" at the top). All text is inline-edited by the teacher; the
+// photo is an inline downscaled data URL. Read-only for everyone else.
+model FacultyCategory {
+  id        String    @id @default(cuid())
+  nameEn    String    @default("")
+  nameUr    String    @default("")
+  order     Int       @default(0)
+  createdAt DateTime  @default(now())
+  members   Faculty[]
+}
+
+model Faculty {
+  id         String   @id @default(cuid())
+  categoryId String
+  nameEn     String   @default("")
+  nameUr     String   @default("")
+  shortEn    String   @default("") // short blurb on the listing card
+  shortUr    String   @default("")
+  bioEn      String   @default("") // full profile on the detail page
+  bioUr      String   @default("")
+  photo      String   @default("") // downscaled data URL
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  category FacultyCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+}
+
+// A testimonial about the teacher. Teacher-managed (add/edit/delete); the author,
+// role and quote are inline-edited. Read-only for everyone else.
+model Testimonial {
+  id        String   @id @default(cuid())
+  author    String   @default("")
+  role      String   @default("")
+  quote     String   @default("")
+  createdAt DateTime @default(now())
+}
+
 // A YouTube video the teacher adds by pasting a link. Title is fetched once from
 // YouTube's free oEmbed endpoint; the thumbnail is derived from videoId. Read-only
 // for students/visitors.

@@ -155,6 +155,28 @@ async function main() {
     });
   }
   console.log(`✓ ${Object.keys(SETTINGS).length} site settings`);
+
+  // 4. Faculty: reserved "Headmaster" category at the top with Prof. Zaheer.
+  // Fixed ids keep it idempotent; the teacher adds more categories/members inline.
+  await prisma.facultyCategory.upsert({
+    where: { id: "cat-headmaster" },
+    update: {},
+    create: { id: "cat-headmaster", nameEn: "Headmaster", nameUr: "ہیڈ ماسٹر", order: 0 },
+  });
+  await prisma.faculty.upsert({
+    where: { id: "fac-zaheer" },
+    update: {},
+    create: {
+      id: "fac-zaheer",
+      categoryId: "cat-headmaster",
+      nameEn: name,
+      nameUr: "پروفیسر محمد ظہیر قندیل",
+      shortEn: "Former Head of Urdu Department, Cadet College Hassan Abdal.",
+      shortUr: "سابق صدر شعبۂ اردو، کیڈٹ کالج حسن ابدال۔",
+      order: 0,
+    },
+  });
+  console.log("✓ faculty (Headmaster + Prof. Zaheer)");
 }
 
 main()

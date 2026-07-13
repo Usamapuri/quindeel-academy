@@ -30,7 +30,7 @@ export function CourseCard({
   const summary = lang === "ur" ? course.summaryUr : course.summaryEn;
 
   return (
-    <div className="group flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-brand/40 hover:shadow-lg">
+    <div className="card card-hover group flex h-full flex-col p-6">
       <div className="mb-3 grid h-12 w-12 place-items-center rounded-xl bg-brand-light text-2xl">
         {ICONS[index % ICONS.length]}
       </div>

@@ -100,9 +100,9 @@ export default async function LandingPage() {
         </div>
       </div>
 
-      {/* Credibility stats strip */}
-      <div className="border-b border-slate-100 bg-white">
-        <div className="mx-auto grid max-w-4xl grid-cols-1 divide-y divide-slate-100 px-4 py-6 text-center sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+      {/* Credibility stats strip — floating card lifted onto the tinted canvas */}
+      <div className="px-4 pt-10">
+        <div className="card mx-auto grid max-w-4xl grid-cols-1 divide-y divide-slate-100 px-4 py-7 text-center sm:grid-cols-3 sm:divide-x sm:divide-y-0">
           {stats.map((n) => (
             <div key={n} className="px-4 py-3 sm:py-0">
               <div>
@@ -158,7 +158,7 @@ export default async function LandingPage() {
 
       {/* Why learn with us */}
       <Reveal>
-        <section className="bg-slate-50 py-14">
+        <section className="bg-white py-14">
           <div className="mx-auto max-w-6xl px-4">
             <Editable
               field={field("featuresTitle")}
@@ -168,7 +168,7 @@ export default async function LandingPage() {
             />
             <div className="grid gap-6 sm:grid-cols-3">
               {features.map((n, i) => (
-                <div key={n} className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm transition hover:shadow-md">
+                <div key={n} className="card card-hover p-6 text-center">
                   <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-brand-light text-brand">
                     {FEATURE_ICONS[i]}
                   </span>
@@ -194,7 +194,7 @@ export default async function LandingPage() {
 
       {/* Courses */}
       <Reveal>
-        <section className="bg-white py-14">
+        <section className="py-14">
           <div className="mx-auto max-w-6xl px-4">
             <Editable
               field={field("coursesTitle")}
@@ -214,7 +214,7 @@ export default async function LandingPage() {
       {/* Testimonials */}
       {testimonials.length > 0 && (
         <Reveal>
-          <section className="bg-slate-50 py-14">
+          <section className="bg-gradient-to-b from-[#e4eef9] to-[#d3e4f5] py-14">
             <div className="mx-auto max-w-6xl px-4">
               <Editable
                 field={field("testimonialsTitle")}
@@ -240,29 +240,31 @@ export default async function LandingPage() {
         </Reveal>
       )}
 
-      {/* Fee + Register CTA */}
+      {/* Fee + Register CTA — highlighted panel */}
       <Reveal>
-        <section className="mx-auto max-w-4xl px-4 py-14 text-center">
-          <Editable
-            field={field("registerTitle")}
-            value={val("registerTitle")}
-            as="h2"
-            className="text-2xl font-bold text-brand-dark sm:text-3xl"
-          />
-          <Editable
-            field={field("registerIntro")}
-            value={val("registerIntro")}
-            as="p"
-            multiline
-            className="mx-auto mt-3 max-w-2xl text-slate-600"
-          />
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <Link href="/fees" className="btn btn-outline">
-              {t(lang, "nav.fees")}
-            </Link>
-            <Link href="/register" className="btn btn-primary">
-              {t(lang, "common.registerNow")}
-            </Link>
+        <section className="px-4 py-14">
+          <div className="card mx-auto max-w-4xl px-6 py-12 text-center sm:px-10">
+            <Editable
+              field={field("registerTitle")}
+              value={val("registerTitle")}
+              as="h2"
+              className="text-2xl font-bold text-brand-dark sm:text-3xl"
+            />
+            <Editable
+              field={field("registerIntro")}
+              value={val("registerIntro")}
+              as="p"
+              multiline
+              className="mx-auto mt-3 max-w-2xl text-slate-600"
+            />
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <Link href="/fees" className="btn btn-outline">
+                {t(lang, "nav.fees")}
+              </Link>
+              <Link href="/register" className="btn btn-primary">
+                {t(lang, "common.registerNow")}
+              </Link>
+            </div>
           </div>
         </section>
       </Reveal>
@@ -270,7 +272,7 @@ export default async function LandingPage() {
       {/* Photo gallery slideshow (auto-cycles) */}
       {photos.length > 0 && (
         <Reveal>
-          <section className="bg-slate-50 py-14">
+          <section className="py-14">
             <div className="mx-auto max-w-6xl px-4">
               <h2 className="mb-8 text-center text-2xl font-bold text-brand-dark sm:text-3xl">
                 {t(lang, "nav.gallery")}

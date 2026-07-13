@@ -50,7 +50,7 @@ export default async function FacultyDetailPage({ params }: { params: Promise<{ 
       </Link>
 
       {/* Header card */}
-      <header className="mt-4 flex flex-col items-center rounded-3xl border border-slate-200 bg-gradient-to-b from-brand-light/60 to-white px-6 py-10 text-center shadow-sm">
+      <header className="mt-4 flex flex-col items-center rounded-3xl border border-slate-200/70 bg-gradient-to-b from-brand-light/60 to-white px-6 py-10 text-center shadow-[0_12px_28px_-12px_rgb(15_23_42/0.18)]">
         <FacultyPhoto facultyId={f.id} photo={f.photo} lang={lang} size="detail" />
         <Editable
           field={`faculty:${f.id}:name${suffix}`}

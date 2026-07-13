@@ -19,7 +19,7 @@ export function FacultyCard({
 }) {
   const ur = lang === "ur";
   return (
-    <div className="mx-auto flex w-full max-w-sm flex-col items-center rounded-2xl border border-slate-200 bg-white p-7 text-center shadow-sm transition hover:shadow-md">
+    <div className="card card-hover mx-auto flex w-full max-w-sm flex-col items-center p-7 text-center">
       <span className="grid h-28 w-28 place-items-center overflow-hidden rounded-full bg-slate-100 ring-2 ring-brand/20">
         {photo ? (
           // eslint-disable-next-line @next/next/no-img-element

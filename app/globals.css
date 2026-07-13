@@ -25,11 +25,32 @@ html {
 
 body {
   font-family: var(--font-body);
-  background: #ffffff;
+  /* Soft tinted canvas so white cards read as raised, not flat-on-white. */
+  background: #eef2f8;
   color: var(--color-ink);
   font-size: 17px;
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Reusable raised card: white surface, hairline, soft layered shadow. */
+.card {
+  background: #ffffff;
+  border: 1px solid rgb(15 23 42 / 0.06);
+  border-radius: 1rem;
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 0.04),
+    0 12px 28px -12px rgb(15 23 42 / 0.18);
+}
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  border-color: rgb(31 111 178 / 0.35);
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 0.05),
+    0 22px 45px -16px rgb(31 111 178 / 0.35);
 }
 
 /* Nastaliq needs extra vertical space and larger glyphs to stay legible. */

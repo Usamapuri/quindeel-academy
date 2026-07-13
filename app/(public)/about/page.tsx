@@ -95,7 +95,7 @@ export default async function AboutPage() {
 
             <div className="flex flex-wrap justify-center gap-6">
               {cat.members.map((f, fi) => (
-                <div key={f.id} className="relative flex w-full flex-col items-center rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm transition hover:shadow-md sm:w-72">
+                <div key={f.id} className="card card-hover relative flex w-full flex-col items-center p-6 text-center sm:w-72">
                   {canEdit && (
                     <div className="absolute right-2 top-2 flex items-center gap-1">
                       <form action={moveFaculty}>

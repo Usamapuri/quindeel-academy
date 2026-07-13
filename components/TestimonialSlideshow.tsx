@@ -21,7 +21,7 @@ export function TestimonialSlideshow({ items }: { items: Item[] }) {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <div className="relative rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm sm:p-10">
+      <div className="card relative p-8 text-center sm:p-10">
         <p className="text-5xl leading-none text-brand/25">“</p>
         <p
           key={cur.id}

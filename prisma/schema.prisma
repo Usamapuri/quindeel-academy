@@ -76,6 +76,18 @@ model SiteSetting {
   value String @default("")
 }
 
+// A YouTube video the teacher adds by pasting a link. Title is fetched once from
+// YouTube's free oEmbed endpoint; the thumbnail is derived from videoId. Read-only
+// for students/visitors.
+model Video {
+  id          String   @id @default(cuid())
+  url         String
+  videoId     String
+  title       String   @default("")
+  description String   @default("") // optional teacher note explaining the video
+  createdAt   DateTime @default(now())
+}
+
 // A blog post. Inline-edited by the teacher on the public /blog page; read-only
 // for everyone else. Bilingual, and hidden from visitors until published.
 model BlogPost {

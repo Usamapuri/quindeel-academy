@@ -19,6 +19,9 @@ const COURSE_COLS = new Set([
 // Editable BlogPost columns (whitelist). `image` holds an optional data-URL cover.
 const BLOG_COLS = new Set(["titleEn", "titleUr", "bodyEn", "bodyUr", "image"]);
 
+// Editable Video columns (whitelist) — just the teacher's description.
+const VIDEO_COLS = new Set(["description"]);
+
 export type SaveResult = { ok: boolean; error?: string };
 
 /**
@@ -49,6 +52,10 @@ export async function saveContent(field: string, value: string): Promise<SaveRes
     const [, id, col] = field.split(":");
     if (!id || !BLOG_COLS.has(col)) return { ok: false, error: "bad field" };
     await prisma.blogPost.update({ where: { id }, data: { [col]: clean } });
+  } else if (field.startsWith("video:")) {
+    const [, id, col] = field.split(":");
+    if (!id || !VIDEO_COLS.has(col)) return { ok: false, error: "bad field" };
+    await prisma.video.update({ where: { id }, data: { [col]: clean } });
   } else {
     return { ok: false, error: "unknown field" };
   }

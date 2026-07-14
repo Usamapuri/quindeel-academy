@@ -50,6 +50,7 @@ export default async function LandingPage() {
   });
   // A few testimonials to feature (edited on the /testimonials page).
   const testimonials = await prisma.testimonial.findMany({
+    where: { status: "approved" },
     orderBy: { createdAt: "desc" },
     take: 8,
   });
@@ -248,6 +249,7 @@ export default async function LandingPage() {
                   quote: tm.quote,
                   author: tm.author,
                   role: tm.role,
+                  photo: tm.photo,
                 }))}
               />
               <div className="mt-6 text-center">

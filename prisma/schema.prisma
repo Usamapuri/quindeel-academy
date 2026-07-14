@@ -105,14 +105,22 @@ model Faculty {
   category FacultyCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 }
 
-// A testimonial about the teacher. Teacher-managed (add/edit/delete); the author,
-// role and quote are inline-edited. Read-only for everyone else.
+// A testimonial about the teacher. Two ways one is created:
+//   1. The teacher adds one directly (status "approved") and inline-edits it.
+//   2. A visitor submits one via the shareable /testify/<token> link — it arrives
+//      as "pending" and only appears on the site once the teacher approves it.
+// `photo` is an optional headshot stored inline as a downscaled data URL (same as
+// blog covers). Only "approved" testimonials are shown to students/visitors.
 model Testimonial {
   id        String   @id @default(cuid())
   author    String   @default("")
   role      String   @default("")
   quote     String   @default("")
+  photo     String   @default("") // optional headshot (downscaled data URL)
+  status    String   @default("approved") // "approved" (live) | "pending" (awaiting review)
   createdAt DateTime @default(now())
+
+  @@index([status])
 }
 
 // A YouTube video the teacher adds by pasting a link. Title is fetched once from

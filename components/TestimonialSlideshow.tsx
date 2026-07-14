@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type Item = { id: string; quote: string; author: string; role: string };
+type Item = { id: string; quote: string; author: string; role: string; photo?: string };
 
 // Auto-cycling testimonial on the home page (~6s each). Read-only — the teacher
 // edits testimonials on the /testimonials page; this just features them. Mirrors
@@ -29,9 +29,15 @@ export function TestimonialSlideshow({ items }: { items: Item[] }) {
         >
           {cur.quote}
         </p>
-        <div className="mt-5 border-t border-slate-100 pt-4">
-          <p className="font-bold text-brand-dark">{cur.author}</p>
-          {cur.role && <p className="text-sm text-slate-500">{cur.role}</p>}
+        <div className="mt-5 flex items-center justify-center gap-3 border-t border-slate-100 pt-4">
+          {cur.photo && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={cur.photo} alt="" className="h-12 w-12 rounded-full object-cover ring-1 ring-slate-200" />
+          )}
+          <div>
+            <p className="font-bold text-brand-dark">{cur.author}</p>
+            {cur.role && <p className="text-sm text-slate-500">{cur.role}</p>}
+          </div>
         </div>
       </div>
       {items.length > 1 && (

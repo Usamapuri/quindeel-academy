@@ -12,6 +12,7 @@ const LINKS = [
   { href: "/admin/live", en: "Live Classes", ur: "لائیو کلاسز", icon: "🎥" },
   { href: "/admin/recordings", en: "Recordings", ur: "ریکارڈنگز", icon: "▶️" },
   { href: "/admin/courses", en: "Courses", ur: "کورسز", icon: "📚" },
+  { href: "/admin/testimonials", en: "Testimonials", ur: "تاثرات", icon: "💬" },
   { href: "/admin/google", en: "Google", ur: "گوگل", icon: "🔗" },
 ];
 

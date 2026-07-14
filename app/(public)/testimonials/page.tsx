@@ -10,7 +10,10 @@ export default async function TestimonialsPage() {
   const ur = lang === "ur";
   const session = await getSession();
   const canEdit = session?.role === "TEACHER";
-  const testimonials = await prisma.testimonial.findMany({ orderBy: { createdAt: "desc" } });
+  const testimonials = await prisma.testimonial.findMany({
+    where: { status: "approved" },
+    orderBy: { createdAt: "desc" },
+  });
 
   return (
     <section className="mx-auto max-w-4xl px-4 py-12">
@@ -52,21 +55,27 @@ export default async function TestimonialsPage() {
                 className="-mt-3 whitespace-pre-wrap break-words text-lg italic leading-relaxed text-slate-700"
                 placeholder={ur ? "یہاں تاثر لکھیں…" : "Write the testimonial here…"}
               />
-              <div className="mt-4 border-t border-slate-100 pt-3">
-                <Editable
-                  field={`testimonial:${tm.id}:author`}
-                  value={tm.author}
-                  as="p"
-                  className="font-bold text-brand-dark"
-                  placeholder={ur ? "نام" : "Name"}
-                />
-                <Editable
-                  field={`testimonial:${tm.id}:role`}
-                  value={tm.role}
-                  as="p"
-                  className="text-sm text-slate-500"
-                  placeholder={ur ? "مثلاً: والد / او لیول طالب علم" : "e.g. Parent / O-Level student"}
-                />
+              <div className="mt-4 flex items-center gap-3 border-t border-slate-100 pt-3">
+                {tm.photo && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={tm.photo} alt="" className="h-12 w-12 shrink-0 rounded-full object-cover ring-1 ring-slate-200" />
+                )}
+                <div>
+                  <Editable
+                    field={`testimonial:${tm.id}:author`}
+                    value={tm.author}
+                    as="p"
+                    className="font-bold text-brand-dark"
+                    placeholder={ur ? "نام" : "Name"}
+                  />
+                  <Editable
+                    field={`testimonial:${tm.id}:role`}
+                    value={tm.role}
+                    as="p"
+                    className="text-sm text-slate-500"
+                    placeholder={ur ? "مثلاً: والد / او لیول طالب علم" : "e.g. Parent / O-Level student"}
+                  />
+                </div>
               </div>
             </div>
           ))}

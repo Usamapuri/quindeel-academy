@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Inter, Noto_Nastaliq_Urdu } from "next/font/google";
+import { Crimson_Pro } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { getLang } from "@/lib/lang";
 import { getSession } from "@/lib/auth";
@@ -7,15 +8,14 @@ import { dir } from "@/lib/i18n";
 import { LangProvider } from "@/components/LangProvider";
 import { EditProvider } from "@/components/EditProvider";
 
-const inter = Inter({
+const crimsonPro = Crimson_Pro({
   subsets: ["latin"],
   variable: "--font-latin",
   display: "swap",
 });
 
-const nastaliq = Noto_Nastaliq_Urdu({
-  subsets: ["arabic"],
-  weight: ["400", "500", "700"],
+const urdType = localFont({
+  src: "../public/fonts/UrdType.ttf",
   variable: "--font-urdu",
   display: "swap",
 });
@@ -37,7 +37,7 @@ export default async function RootLayout({
     <html
       lang={lang}
       dir={dir(lang)}
-      className={`${inter.variable} ${nastaliq.variable} h-full`}
+      className={`${crimsonPro.variable} ${urdType.variable} h-full`}
     >
       <body className="flex min-h-full flex-col">
         <LangProvider lang={lang}>

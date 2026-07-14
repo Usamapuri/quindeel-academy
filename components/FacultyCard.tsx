@@ -33,7 +33,7 @@ export function FacultyCard({
         <p className="mt-1 whitespace-pre-wrap break-words text-sm text-slate-600">{short}</p>
       )}
       <Link href={`/about/${id}`} className="mt-4 text-sm font-semibold text-brand hover:underline">
-        {ur ? "مکمل تعارف →" : "View full profile →"}
+        {ur ? "مکمل تعارف ←" : "View full profile →"}
       </Link>
     </div>
   );

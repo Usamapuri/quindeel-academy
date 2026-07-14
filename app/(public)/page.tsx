@@ -141,7 +141,7 @@ export default async function LandingPage() {
                   </ul>
                 )}
                 <Link href={`/about/${founder.id}`} className="mt-5 inline-block text-sm font-semibold text-brand hover:underline">
-                  {lang === "ur" ? "مکمل تعارف →" : "View full profile →"}
+                  {lang === "ur" ? "مکمل تعارف ←" : "View full profile →"}
                 </Link>
               </div>
             )}
@@ -252,7 +252,7 @@ export default async function LandingPage() {
               />
               <div className="mt-6 text-center">
                 <Link href="/testimonials" className="text-sm font-semibold text-brand hover:text-brand-dark">
-                  {lang === "ur" ? "تمام آراء دیکھیں" : "Read all testimonials"} →
+                  {lang === "ur" ? "تمام آراء دیکھیں ←" : "Read all testimonials →"}
                 </Link>
               </div>
             </div>
@@ -300,7 +300,7 @@ export default async function LandingPage() {
               <GallerySlideshow urls={photos.map((p) => p.url)} />
               <div className="mt-5 text-center">
                 <Link href="/gallery" className="text-sm font-semibold text-brand hover:text-brand-dark">
-                  {lang === "ur" ? "پوری گیلری دیکھیں" : "View full gallery"} →
+                  {lang === "ur" ? "پوری گیلری دیکھیں ←" : "View full gallery →"}
                 </Link>
               </div>
             </div>

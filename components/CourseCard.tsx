@@ -56,7 +56,7 @@ export function CourseCard({
           href={`/courses/${course.slug}`}
           className="text-sm font-semibold text-brand hover:text-brand-dark"
         >
-          {viewLabel} →
+          {lang === "ur" ? `${viewLabel} ←` : `${viewLabel} →`}
         </Link>
       </div>
     </div>

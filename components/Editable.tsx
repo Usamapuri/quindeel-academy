@@ -46,8 +46,11 @@ export function Editable({
     });
   }
 
+  const isBlock = as === "h1" || as === "h2" || as === "h3" || as === "h4" || as === "h5" || as === "h6" || as === "p" || as === "div" || (!as && multiline);
+  const wrapperClass = `group/edit relative max-w-full ${isBlock ? "block" : "inline-block align-baseline"}`;
+
   return (
-    <span className="group/edit relative inline-block max-w-full align-baseline">
+    <span className={wrapperClass}>
       <Tag
         contentEditable
         suppressContentEditableWarning

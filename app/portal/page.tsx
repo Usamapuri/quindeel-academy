@@ -302,7 +302,7 @@ export default async function PortalHome() {
 
       <div className="mt-8 text-center">
         <Link href="/" className="text-sm font-semibold text-brand hover:text-brand-dark">
-          {lang === "ur" ? "ویب سائٹ دیکھیں" : "View website"} →
+          {lang === "ur" ? "ویب سائٹ دیکھیں ←" : "View website →"}
         </Link>
       </div>
     </div>

@@ -144,7 +144,7 @@ export default async function AboutPage() {
                   />
 
                   <Link href={`/about/${f.id}`} className="mt-3 text-sm font-semibold text-brand hover:underline">
-                    {ur ? "مکمل تعارف →" : "View full profile →"}
+                    {ur ? "مکمل تعارف ←" : "View full profile →"}
                   </Link>
                 </div>
               ))}

@@ -114,7 +114,7 @@ export default async function FeesPage() {
         )}
 
         <Link href="/register" className="btn btn-outline mt-6 w-full">
-          {ur ? "داخلہ لیں" : "Enroll now"} →
+          {ur ? "داخلہ لیں ←" : "Enroll now →"}
         </Link>
       </div>
     );

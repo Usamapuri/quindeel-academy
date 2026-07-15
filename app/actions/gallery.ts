@@ -46,6 +46,17 @@ export async function addPhoto(formData: FormData) {
   revalidatePath("/", "layout");
 }
 
+// Pin/unpin a photo so it appears in the home-page collage. Teacher-only.
+export async function togglePhotoFeatured(formData: FormData) {
+  await requireRole("TEACHER");
+  const id = String(formData.get("id") || "");
+  const on = String(formData.get("on") || "") === "true";
+  if (!id) return;
+  await prisma.photo.update({ where: { id }, data: { featured: on } });
+  revalidatePath("/gallery");
+  revalidatePath("/", "layout");
+}
+
 export async function deletePhoto(formData: FormData) {
   await requireRole("TEACHER");
   const id = String(formData.get("id") || "");

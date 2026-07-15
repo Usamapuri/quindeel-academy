@@ -15,7 +15,7 @@ export default async function GalleryPage() {
         {ur ? "اکیڈمی کی تصاویر اور لمحات۔" : "Photos and moments from the academy."}
       </p>
       <PhotoGallery
-        photos={photos.map((p) => ({ id: p.id, url: p.url }))}
+        photos={photos.map((p) => ({ id: p.id, url: p.url, featured: p.featured }))}
         configured={cloudinaryConfigured()}
         lang={lang}
       />

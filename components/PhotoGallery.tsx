@@ -4,10 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useEdit } from "./EditProvider";
 import ConfirmDeleteButton from "./ConfirmDeleteButton";
-import { signUpload, addPhoto, deletePhoto } from "@/app/actions/gallery";
+import { signUpload, addPhoto, deletePhoto, togglePhotoFeatured } from "@/app/actions/gallery";
 import { cld, THUMB, FULL } from "@/lib/cld";
 
-type Photo = { id: string; url: string };
+type Photo = { id: string; url: string; featured?: boolean };
 
 export function PhotoGallery({
   photos,
@@ -111,6 +111,31 @@ export function PhotoGallery({
                 onClick={() => setZoom(i)}
                 className="h-full w-full cursor-zoom-in object-cover transition hover:opacity-90"
               />
+              {canEdit && (
+                <form
+                  action={togglePhotoFeatured}
+                  className={"absolute left-1 top-1 transition " + (p.featured ? "opacity-100" : "opacity-0 group-hover:opacity-100")}
+                >
+                  <input type="hidden" name="id" value={p.id} />
+                  <input type="hidden" name="on" value={String(!p.featured)} />
+                  <button
+                    type="submit"
+                    title={p.featured ? (ur ? "ہوم پیج سے ہٹائیں" : "Unpin from home") : (ur ? "ہوم پیج پر لگائیں" : "Pin to home")}
+                    className={
+                      "grid h-7 w-7 place-items-center rounded-full text-sm font-bold shadow transition " +
+                      (p.featured ? "bg-amber-400 text-white hover:bg-amber-500" : "bg-black/50 text-white hover:bg-black/70")
+                    }
+                  >
+                    {p.featured ? "★" : "☆"}
+                  </button>
+                </form>
+              )}
+              {/* Small "on home page" badge for the teacher, so pinned photos are obvious at a glance. */}
+              {canEdit && p.featured && (
+                <span className="pointer-events-none absolute bottom-1 left-1 rounded-full bg-amber-400/95 px-2 py-0.5 text-[10px] font-bold text-white shadow">
+                  {ur ? "ہوم پیج" : "On home"}
+                </span>
+              )}
               {canEdit && (
                 <div className="absolute right-1 top-1 opacity-0 transition group-hover:opacity-100">
                   <ConfirmDeleteButton

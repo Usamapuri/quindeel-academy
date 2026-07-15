@@ -5,7 +5,8 @@ import { getSettings, settingKey } from "@/lib/content";
 import { t } from "@/lib/i18n";
 import { Editable } from "@/components/Editable";
 import { CourseCard } from "@/components/CourseCard";
-import { GallerySlideshow } from "@/components/GallerySlideshow";
+import { VideoShowcase } from "@/components/VideoShowcase";
+import { PhotoCollage } from "@/components/PhotoCollage";
 import { TestimonialSlideshow } from "@/components/TestimonialSlideshow";
 import { Reveal } from "@/components/Reveal";
 
@@ -41,8 +42,23 @@ export default async function LandingPage() {
     where: { published: true },
     orderBy: { order: "asc" },
   });
-  // Latest photos for the home-page slideshow (kept small to stay light).
-  const photos = await prisma.photo.findMany({ orderBy: { createdAt: "desc" }, take: 12 });
+  // Home collage photos: teacher-pinned first; if none pinned yet, fall back to the
+  // latest photos so the section is never empty.
+  const featuredPhotos = await prisma.photo.findMany({
+    where: { featured: true },
+    orderBy: { createdAt: "desc" },
+    take: 9,
+  });
+  const photos =
+    featuredPhotos.length > 0
+      ? featuredPhotos
+      : await prisma.photo.findMany({ orderBy: { createdAt: "desc" }, take: 9 });
+  // Latest public videos (no course assigned) for the home-page video showcase.
+  const publicVideos = await prisma.video.findMany({
+    where: { courses: { none: {} } },
+    orderBy: { createdAt: "desc" },
+    take: 6,
+  });
   // The featured founder = first member of the first faculty category (seeded: Prof. Zaheer).
   // Single source of truth: the professor edits himself on /about and it shows here too.
   const founder = await prisma.faculty.findFirst({
@@ -262,6 +278,47 @@ export default async function LandingPage() {
         </Reveal>
       )}
 
+      {/* See us in action — public videos + photo collage as one proof band */}
+      {(publicVideos.length > 0 || photos.length > 0) && (
+        <Reveal>
+          <section className="bg-white py-14">
+            <div className="mx-auto max-w-6xl px-4">
+              <Editable
+                field={field("mediaTitle")}
+                value={val("mediaTitle") || (lang === "ur" ? "اکیڈمی کی جھلکیاں" : "See us in action")}
+                as="h2"
+                className="mb-10 text-center text-2xl font-bold text-brand-dark sm:text-3xl"
+              />
+
+              {publicVideos.length > 0 && (
+                <div className="mb-12">
+                  <VideoShowcase
+                    items={publicVideos.map((v) => ({ videoId: v.videoId, title: v.title }))}
+                    lang={lang}
+                  />
+                  <div className="mt-5 text-center">
+                    <Link href="/videos" className="text-sm font-semibold text-brand hover:text-brand-dark">
+                      {lang === "ur" ? "تمام ویڈیوز دیکھیں ←" : "View all videos →"}
+                    </Link>
+                  </div>
+                </div>
+              )}
+
+              {photos.length > 0 && (
+                <div>
+                  <PhotoCollage urls={photos.map((p) => p.url)} lang={lang} />
+                  <div className="mt-6 text-center">
+                    <Link href="/gallery" className="text-sm font-semibold text-brand hover:text-brand-dark">
+                      {lang === "ur" ? "پوری گیلری دیکھیں ←" : "View full gallery →"}
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        </Reveal>
+      )}
+
       {/* Fee + Register CTA — highlighted panel */}
       <Reveal>
         <section className="px-4 py-14">
@@ -290,25 +347,6 @@ export default async function LandingPage() {
           </div>
         </section>
       </Reveal>
-
-      {/* Photo gallery slideshow (auto-cycles) */}
-      {photos.length > 0 && (
-        <Reveal>
-          <section className="py-14">
-            <div className="mx-auto max-w-6xl px-4">
-              <h2 className="mb-8 text-center text-2xl font-bold text-brand-dark sm:text-3xl">
-                {t(lang, "nav.gallery")}
-              </h2>
-              <GallerySlideshow urls={photos.map((p) => p.url)} />
-              <div className="mt-5 text-center">
-                <Link href="/gallery" className="text-sm font-semibold text-brand hover:text-brand-dark">
-                  {lang === "ur" ? "پوری گیلری دیکھیں ←" : "View full gallery →"}
-                </Link>
-              </div>
-            </div>
-          </section>
-        </Reveal>
-      )}
     </>
   );
 }

@@ -249,6 +249,9 @@ model Photo {
   id        String   @id @default(cuid())
   url       String
   publicId  String
+  // Teacher can "pin" photos to feature them in the home-page collage. If none are
+  // pinned, the home collage falls back to the latest photos so it's never empty.
+  featured  Boolean  @default(false)
   createdAt DateTime @default(now())
 }
 
